@@ -1,0 +1,18 @@
+.noRecipeMessage {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 2rem;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 2rem auto;
+  max-width: 400px;
+}
+
+.noRecipeMessage::before {
+  content: "🍽️";
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}

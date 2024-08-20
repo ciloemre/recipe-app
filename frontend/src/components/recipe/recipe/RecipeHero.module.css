@@ -1,0 +1,106 @@
+.recipeHero {
+  background-image: url("https://isinolsun.com/blog/wp-content/uploads/2023/06/asci-1.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  padding: 80px;
+  border-radius: 8px;
+}
+
+.recipeHero .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: inherit;
+}
+
+.recipeHero .buttonGroup {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  z-index: 2;
+}
+
+.recipeHero .addButton {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.recipeHero .plusIcon {
+  margin-right: 8px;
+}
+
+.recipeHero .contentBox {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.recipeHero .title {
+  font-size: 4rem;
+  width: 700px;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: "Playfair Display", serif;
+  letter-spacing: 1px;
+}
+
+.recipeHero .description {
+  font-size: 24px;
+  color: white;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.recipeHero .searchBar {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .recipeHero {
+    height: 50vh;
+    min-height: 500px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .recipeHero .buttonGroup {
+    position: static;
+    align-self: flex-end;
+    margin-bottom: 20px;
+  }
+
+  .recipeHero .contentBox {
+    margin-top: auto;
+    height: auto;
+  }
+
+  .recipeHero .title {
+    width: 100%;
+    font-size: 2.5rem;
+  }
+
+  .recipeHero .description {
+    font-size: 18px;
+    max-width: 100%;
+  }
+
+  .recipeHero .searchBar {
+    max-width: 100%;
+  }
+}

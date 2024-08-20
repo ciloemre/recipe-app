@@ -1,0 +1,108 @@
+.container {
+  margin-bottom: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container .title {
+  margin-bottom: 20px;
+  color: var(--mantine-color-orange-6);
+  font-size: 30px;
+}
+
+.card {
+  margin: 15px 15px 15px 15px;
+}
+
+.errorText {
+  text-align: center;
+  color: red;
+}
+
+.noRecipesText {
+  text-align: center;
+}
+
+.recipeImage {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+}
+
+.imageSection {
+  position: relative;
+}
+
+.newBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.container .recipeTitle {
+  width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.container .recipeDescription {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.container .recipeInfo {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.container .recipeInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+}
+
+.prepTime,
+.cookTime,
+.difficulty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.authorInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 1200px) {
+  .container .title {
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin-bottom: 100px;
+  }
+
+  .recipeTitle {
+    width: 100%;
+  }
+  .container .title {
+    margin-bottom: 15px;
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 468px) {
+  .container .title {
+    margin-bottom: 12px;
+    font-size: 22px;
+  }
+}

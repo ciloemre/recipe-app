@@ -1,0 +1,49 @@
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0px 10px 0px 10px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 10px 0px 0px 0px;
+}
+
+.cardImage {
+  height: 190px;
+  object-fit: cover;
+}
+
+.cardTitle {
+  font-weight: bold;
+}
+
+.cardFooter {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Diğer stiller aynı kalabilir */
+.cardStats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewButton {
+  margin-left: auto;
+}
+
+.dateBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 0.8rem;
+  padding: 5px 10px;
+}

@@ -1,0 +1,144 @@
+.container {
+  position: relative;
+  height: 40vh;
+  min-height: 300px;
+}
+
+.backgroundImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("https://cdn.kisikates.com.tr/image-cache/cache/post_main_image_large/https---cdn.kisikates.com.tr/post-main-image/3426bf964d006192159096b2548f2a94c4adf616.jpg");
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+.content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 50px;
+}
+
+.container .title {
+  color: var(--mantine-color-orange-6);
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 36px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.container .buttonGroup .button {
+  border-width: 2px;
+  white-space: nowrap;
+  padding: 5px 20px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.container .buttonGroup .button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container .buttonGroup .button .icon {
+  margin-right: 8px;
+}
+
+@media (max-width: 1200px) {
+  .container .title {
+    font-size: 32px;
+  }
+
+  .container .buttonGroup .button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 968px) {
+  .container {
+    height: 30vh;
+    min-height: 250px;
+  }
+
+  .container .title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+
+  .buttonGroup {
+    gap: 15px;
+  }
+
+  .container .buttonGroup .button {
+    padding: 7px 14px;
+    font-size: 13px;
+  }
+
+  .container .buttonGroup .button .icon {
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    height: 25vh;
+    min-height: 200px;
+  }
+
+  .container .title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .buttonGroup {
+    gap: 10px;
+  }
+
+  .container .buttonGroup .button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .container .buttonGroup .button .icon {
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 468px) {
+  .container {
+    height: 20vh;
+    min-height: 180px;
+  }
+
+  .container .title {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .buttonGroup {
+    gap: 8px;
+  }
+
+  .container .buttonGroup .button {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .container .buttonGroup .button .icon {
+    margin-right: 4px;
+  }
+}

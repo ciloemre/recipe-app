@@ -1,0 +1,92 @@
+.heroBox {
+  position: relative;
+  height: 70vh;
+  background-image: url("https://images.unsplash.com/photo-1543339308-43e59d6b73a6");
+  background-size: cover;
+  background-position: center;
+}
+
+.container {
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.stack {
+  height: 100%;
+  text-align: center;
+}
+
+.title {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.text {
+  color: white;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.button {
+  background: linear-gradient(
+    to right,
+    var(--mantine-color-orange-6),
+    var(--mantine-color-red-6)
+  );
+}
+
+@media (max-width: 1200px) {
+  .heroBox {
+    height: 60vh;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .text {
+    font-size: 1rem;
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroBox {
+    height: 50vh;
+  }
+
+  .container .title {
+    font-size: 25px;
+  }
+
+  .container .text {
+    font-size: 17px;
+    max-width: 90%;
+  }
+
+  .container .button {
+    font-size: 13px;
+    padding: 13px 25px;
+    min-height: auto;
+    height: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .container .title {
+    font-size: 20px;
+  }
+
+  .container .text {
+    font-size: 13px;
+    max-width: 90%;
+  }
+
+  .container .button {
+    font-size: 11px;
+    padding: 11px 20px;
+    min-height: auto;
+    height: auto;
+  }
+}
