@@ -3,6 +3,7 @@ import { Group, Text, Tooltip, ActionIcon, Badge, Rating } from "@mantine/core";
 import { IconHeart, IconMessageCircle, IconStar } from "@tabler/icons-react";
 import { CustomButton } from "../../atoms/CustomButton";
 import { useSocket } from "../../../hooks/useSocket";
+import { useRecipe } from "../../../contexts/RecipeContext";
 
 interface RecipeActionsProps {
   isFavorite: boolean;
@@ -26,9 +27,11 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   recipeId,
 }) => {
   const { emit } = useSocket();
+  const { updateFavoriteStatus } = useRecipe();
 
   const handleToggleFavorite = async () => {
     await toggleFavorite();
+    updateFavoriteStatus(recipeId, !isFavorite);
     emit("favoriteToggled", { recipeId, isFavorite: !isFavorite });
   };
 

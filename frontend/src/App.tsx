@@ -16,7 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.tsx";
-import SettingsPage from "./pages/SettingsPage";
+// import SettingsPage from "./pages/SettingsPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RecipeProvider } from "./contexts/RecipeContext";
 import RecipePage from "./pages/RecipePage.tsx";
@@ -53,7 +53,7 @@ const App: React.FC = () => {
                   <Route path="/create" element={<CreateRecipePage />} />
                   <Route path="/create-recipe" element={<CreateRecipePage />} />
                   <Route path="/recipe-form" element={<CreateRecipePage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  {/* <Route path="/settings" element={<SettingsPage />} /> */}
                   <Route path="/logout" element={<LogoutPage />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />{" "}

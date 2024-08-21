@@ -82,7 +82,7 @@ export function RecipeList({
         containerProps={{ size: "90%", px: "xs" }}
         renderItems={(paginatedRecipes) => (
           <SimpleGrid
-            cols={{ base: 1, xs: 2, sm: 3, lg: 4 }}
+            cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
             spacing={{ base: "sm", sm: "lg" }}
             verticalSpacing={{ base: "md", sm: "xl" }}
           >

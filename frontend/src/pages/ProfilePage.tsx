@@ -4,8 +4,8 @@ import { useProfileData } from "../hooks/useProfileData";
 import { ProfileHeader } from "../components/recipe/profile/ProfileHeader";
 import { ProfileTabs } from "../components/recipe/profile/ProfileTabs";
 import { MyRecipesList } from "../components/recipe/profile/MyRecipesList";
-import { MyFavoritesList } from "../components/recipe/profile/MyFavoritesList";
 import { useSocket } from "../hooks/useSocket";
+import FavoritesPage from "./FavoritesPage";
 
 export function ProfilePage() {
   const {
@@ -13,7 +13,6 @@ export function ProfilePage() {
     userRecipes,
     loading,
     error,
-    handleFavoriteToggle,
     handleDeleteRecipe,
     handleEditRecipe,
     updateRecipe,
@@ -59,7 +58,7 @@ export function ProfilePage() {
   return (
     <Container size={"90%"}>
       <ProfileHeader user={userData} />
-      <Box mt="xl" p="md" style={{ backgroundColor: "#fff", borderRadius: 8 }}>
+      <Box mt="xl" p="md">
         <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <Box mt="md">
           {activeTab === "myRecipes" && (
@@ -69,9 +68,7 @@ export function ProfilePage() {
               onEditRecipe={handleEditRecipe}
             />
           )}
-          {activeTab === "favoriteRecipes" && (
-            <MyFavoritesList onFavoriteToggle={handleFavoriteToggle} />
-          )}
+          {activeTab === "favoriteRecipes" && <FavoritesPage />}
         </Box>
       </Box>
     </Container>

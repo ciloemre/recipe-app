@@ -13,8 +13,8 @@ export const useCreateRecipe = () => {
       const { author, ...restRecipeData } = recipeData;
       const createdRecipe = await createRecipe({
         ...restRecipeData,
-        authorId: author, // Burada author'u authorId olarak kullanıyoruz
-        authorName: author, // Burada author'u authorName olarak da kullanıyoruz
+        authorId: author,
+        authorName: author,
       });
       return createdRecipe;
     } catch (err: unknown) {

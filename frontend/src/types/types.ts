@@ -16,6 +16,7 @@ export interface Recipe {
   ratingCount?: number;
   createdAt: string;
   updatedAt: string;
+  addedToFavoritesAt: string;
 }
 
 export interface User {

@@ -7,12 +7,10 @@ import {
   updateRecipe as apiUpdateRecipe,
 } from "../api/api";
 import { Recipe, User } from "../types/types";
-import { useRecipe } from "../contexts/RecipeContext";
 import { sortByCreatedAt } from "../utils/formatRecipeData";
 import { useSocket } from "../hooks/useSocket";
 
 export function useProfileData() {
-  const { toggleFavoriteRecipe } = useRecipe();
   const [userData, setUserData] = useState<User | null>(null);
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
@@ -32,7 +30,7 @@ export function useProfileData() {
       setUserData(userData);
       setUserRecipes(recipes.sort(sortByCreatedAt));
 
-      const initialProcessedFavorites = favorites.map((favorite) => ({
+      const processedFavorites = favorites.map((favorite) => ({
         ...favorite,
         author:
           typeof favorite.author === "string"
@@ -40,7 +38,8 @@ export function useProfileData() {
             : favorite.author,
       }));
 
-      setFavoriteRecipes(initialProcessedFavorites);
+      setFavoriteRecipes(processedFavorites);
+      setError(null);
     } catch (error) {
       console.error("Error fetching user data and recipes:", error);
       setError("Kullanıcı bilgileri ve tarifleri yüklenirken bir hata oluştu.");
@@ -54,26 +53,26 @@ export function useProfileData() {
   }, [fetchUserDataAndRecipes]);
 
   const updateRecipe = useCallback((updatedRecipe: Recipe) => {
-    setUserRecipes((prevRecipes) =>
+    const updateRecipeList = (prevRecipes: Recipe[]) =>
       prevRecipes.map((recipe) =>
         recipe._id === updatedRecipe._id ? updatedRecipe : recipe
-      )
-    );
-    setFavoriteRecipes((prevFavorites) =>
-      prevFavorites.map((recipe) =>
-        recipe._id === updatedRecipe._id ? updatedRecipe : recipe
-      )
-    );
+      );
+
+    setUserRecipes(updateRecipeList);
+    setFavoriteRecipes(updateRecipeList);
   }, []);
 
   const removeRecipe = useCallback((deletedRecipeId: string) => {
-    setUserRecipes((prevRecipes) =>
-      prevRecipes.filter((recipe) => recipe._id !== deletedRecipeId)
-    );
-    setFavoriteRecipes((prevFavorites) =>
-      prevFavorites.filter((recipe) => recipe._id !== deletedRecipeId)
-    );
+    const filterRecipes = (recipes: Recipe[]) =>
+      recipes.filter((recipe) => recipe._id !== deletedRecipeId);
+
+    setUserRecipes(filterRecipes);
+    setFavoriteRecipes(filterRecipes);
   }, []);
+
+  useEffect(() => {
+    fetchUserDataAndRecipes();
+  }, [fetchUserDataAndRecipes]);
 
   useEffect(() => {
     const handleRecipeUpdate = (updatedRecipe: Recipe) => {
@@ -84,45 +83,36 @@ export function useProfileData() {
       removeRecipe(deletedRecipeId);
     };
 
-    on("recipeUpdated", handleRecipeUpdate);
-    on("recipeDeleted", handleRecipeDelete);
-    on("recipeRated", handleRecipeUpdate);
-    on("commentAdded", handleRecipeUpdate);
-    on("commentDeleted", handleRecipeUpdate);
+    const events = [
+      "recipeUpdated",
+      "recipeDeleted",
+      "recipeRated",
+      "commentAdded",
+      "commentDeleted",
+    ];
+
+    events.forEach((event) => {
+      on(
+        event,
+        event === "recipeDeleted" ? handleRecipeDelete : handleRecipeUpdate
+      );
+    });
 
     return () => {
-      off("recipeUpdated", handleRecipeUpdate);
-      off("recipeDeleted", handleRecipeDelete);
-      off("recipeRated", handleRecipeUpdate);
-      off("commentAdded", handleRecipeUpdate);
-      off("commentDeleted", handleRecipeUpdate);
+      events.forEach((event) => {
+        off(
+          event,
+          event === "recipeDeleted" ? handleRecipeDelete : handleRecipeUpdate
+        );
+      });
     };
   }, [on, off, updateRecipe, removeRecipe]);
-
-  const handleFavoriteToggle = async (recipeId: string) => {
-    await toggleFavoriteRecipe(recipeId);
-    try {
-      const updatedFavorites = await getFavorites();
-      const updatedProcessedFavorites = updatedFavorites.map((favorite) => ({
-        ...favorite,
-        author:
-          typeof favorite.author === "string"
-            ? { _id: favorite.author, username: userData?.username || "" }
-            : favorite.author,
-      }));
-      setFavoriteRecipes(updatedProcessedFavorites);
-    } catch (error) {
-      console.error("Favoriler güncellenirken hata oluştu:", error);
-      setError(
-        "Favoriler güncellenirken bir hata oluştu. Lütfen tekrar deneyin."
-      );
-    }
-  };
 
   const handleDeleteRecipe = async (recipeId: string): Promise<void> => {
     try {
       await deleteRecipe(recipeId);
       removeRecipe(recipeId);
+      setError(null);
     } catch (error) {
       console.error("Tarif silinirken hata oluştu:", error);
       setError("Tarif silinirken bir hata oluştu. Lütfen tekrar deneyin.");
@@ -135,6 +125,7 @@ export function useProfileData() {
     try {
       const updated = await apiUpdateRecipe(updatedRecipe._id!, updatedRecipe);
       updateRecipe(updated);
+      setError(null);
     } catch (error) {
       console.error("Tarif güncellenirken hata oluştu:", error);
       setError("Tarif güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
@@ -147,7 +138,6 @@ export function useProfileData() {
     favoriteRecipes,
     loading,
     error,
-    handleFavoriteToggle,
     handleDeleteRecipe,
     handleEditRecipe,
     fetchUserDataAndRecipes,

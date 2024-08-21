@@ -104,7 +104,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
   };
 
   return (
-    <Container size="md">
+    <Container size="xl">
       <Paper shadow="md" p="xl" radius="md">
         <Title order={2} mb="xl">
           Tarifi Düzenle

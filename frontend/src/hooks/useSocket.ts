@@ -1,8 +1,7 @@
-// useSocket.ts dosyasında
 import { useState, useEffect, useRef, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:5003"; // veya process.env.REACT_APP_SOCKET_URL gibi bir environment variable kullanabilirsiniz
+const SOCKET_URL = "http://localhost:5003";
 
 export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(false);

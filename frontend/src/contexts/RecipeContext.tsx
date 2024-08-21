@@ -15,9 +15,10 @@ interface RecipeContextType {
   favorites: string[];
   setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>;
   setFavorites: React.Dispatch<React.SetStateAction<string[]>>;
-  toggleFavoriteRecipe: (recipeId: string) => Promise<void>;
+  toggleFavoriteRecipe: (recipeId: string) => Promise<boolean>;
   updateRecipeInState: (updatedRecipe: Recipe) => void;
   deleteRecipeFromState: (recipeId: string) => void;
+  updateFavoriteStatus: (recipeId: string, isFavorite: boolean) => void;
   loading: boolean;
   error: string | null;
 }
@@ -76,29 +77,47 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
         );
       };
 
+      const handleFavoriteToggled = ({
+        recipeId,
+        isFavorite,
+      }: {
+        recipeId: string;
+        isFavorite: boolean;
+      }) => {
+        setFavorites((prev) =>
+          isFavorite
+            ? [...prev, recipeId]
+            : prev.filter((id) => id !== recipeId)
+        );
+      };
+
       on("recipeAdded", handleNewRecipe);
       on("recipeUpdated", handleUpdatedRecipe);
       on("recipeDeleted", handleDeletedRecipe);
+      on("favoriteToggled", handleFavoriteToggled);
 
       return () => {
         off("recipeAdded", handleNewRecipe);
         off("recipeUpdated", handleUpdatedRecipe);
         off("recipeDeleted", handleDeletedRecipe);
+        off("favoriteToggled", handleFavoriteToggled);
       };
     }
   }, [user, on, off, fetchData, isConnected]);
 
-  const toggleFavoriteRecipe = async (recipeId: string) => {
-    if (!user) return;
+  const toggleFavoriteRecipe = async (recipeId: string): Promise<boolean> => {
+    if (!user) return false;
 
     try {
       const { isFavorite } = await toggleFavorite(recipeId);
       setFavorites((prev) =>
         isFavorite ? [...prev, recipeId] : prev.filter((id) => id !== recipeId)
       );
+      return isFavorite;
     } catch (error) {
       console.error("Error toggling favorite status:", error);
       setError("An error occurred while updating favorite status");
+      throw error;
     }
   };
 
@@ -116,6 +135,15 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, []);
 
+  const updateFavoriteStatus = useCallback(
+    (recipeId: string, isFavorite: boolean) => {
+      setFavorites((prev) =>
+        isFavorite ? [...prev, recipeId] : prev.filter((id) => id !== recipeId)
+      );
+    },
+    []
+  );
+
   return (
     <RecipeContext.Provider
       value={{
@@ -126,6 +154,7 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleFavoriteRecipe,
         updateRecipeInState,
         deleteRecipeFromState,
+        updateFavoriteStatus,
         loading,
         error,
       }}

@@ -45,12 +45,12 @@
 
 .userName {
   margin-bottom: 10px;
-  background: linear-gradient(45deg, #ff0000, #ff9100, #09ff00);
+  background: linear-gradient(95deg, #ff7b00, #ff8b2b, #000000);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: fadeInUp 1s ease-out 0.5s both;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(255, 123, 0, 0.3);
 }
 
 .subText {

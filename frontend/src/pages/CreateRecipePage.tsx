@@ -1,9 +1,9 @@
 import { Container } from "@mantine/core";
 import { RecipeForm } from "../components/recipe/createRecipe/RecipeForm";
-import CustomTitle from "../components/atoms/CustomTitle";
 import { AuthenticatedContent } from "../components/recipe/AuthenticatedContent";
 import { useRecipeFormSubmit } from "../hooks/useRecipeFormSubmit";
 import { RecipeFormData } from "../types/types";
+import PageHeader from "../components/recipe/createRecipe/PageHeader";
 
 export function CreateRecipePage() {
   const {
@@ -17,10 +17,8 @@ export function CreateRecipePage() {
 
   return (
     <AuthenticatedContent>
-      <Container p="xl" size="md">
-        <CustomTitle level={1} mb="xl">
-          Yeni Tarif Oluştur
-        </CustomTitle>
+      <Container p="xl" size="xl">
+        <PageHeader title="Yeni Tarif Oluştur" backLink="/recipes" />
         <RecipeForm
           formData={formData}
           onInputChange={(

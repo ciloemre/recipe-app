@@ -1,5 +1,5 @@
 import User, { IUser } from "../models/User";
-import Recipe from "../models/Recipe"; // Recipe modelini import edin
+import Recipe from "../models/Recipe";
 import mongoose from "mongoose";
 
 export class UserService {

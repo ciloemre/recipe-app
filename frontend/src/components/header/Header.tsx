@@ -9,15 +9,9 @@ import {
   UnstyledButton,
   Image,
 } from "@mantine/core";
-import { IconSun, IconMoonStars } from "@tabler/icons-react";
+import { IconSun, IconMoonStars, IconReceipt } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  IconHome2,
-  IconHeart,
-  IconUserCircle,
-  IconSettings,
-  IconLogout,
-} from "@tabler/icons-react";
+import { IconHome2, IconUserCircle, IconLogout } from "@tabler/icons-react";
 import classes from "./HeaderSearch.module.css";
 import recipe from "../../assets/recipe.png";
 
@@ -57,9 +51,8 @@ function NavbarLink({
 }
 
 const navItems = [
-  { icon: IconHeart, label: "Favorilerim", to: "/favorites" },
+  { icon: IconReceipt, label: "Tarifler", to: "/recipes" },
   { icon: IconUserCircle, label: "Profilim", to: "/profile" },
-  { icon: IconSettings, label: "Ayarlar", to: "/settings" },
 ];
 
 export function Header() {

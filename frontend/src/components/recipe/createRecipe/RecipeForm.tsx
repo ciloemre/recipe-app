@@ -42,7 +42,7 @@ export function RecipeForm({
   isLoading,
 }: RecipeFormProps) {
   return (
-    <Container size="md">
+    <Container size="xl">
       <form onSubmit={onSubmit}>
         <BasicInfoSection
           formData={formData}
