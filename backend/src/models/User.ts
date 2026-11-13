@@ -9,6 +9,9 @@ export interface IUser extends Document {
   password: string;
   isAdmin: boolean;
   favorites: Types.ObjectId[];
+  followers: Types.ObjectId[];
+  following: Types.ObjectId[];
+  avatar?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -20,6 +23,9 @@ const UserSchema: Schema = new Schema(
     password: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
     favorites: [{ type: Types.ObjectId, ref: "Recipe" }],
+    followers: [{ type: Types.ObjectId, ref: "User" }],
+    following: [{ type: Types.ObjectId, ref: "User" }],
+    avatar: { type: String, default: "" },
   },
   {
     timestamps: true,

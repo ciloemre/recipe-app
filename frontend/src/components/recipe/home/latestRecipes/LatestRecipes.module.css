@@ -1,5 +1,5 @@
 .container {
-  margin-bottom: 150px;
+  margin-bottom: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -75,9 +75,11 @@
 }
 .authorInfo {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 8px;
   margin-top: 16px;
+  min-width: 0;
 }
 
 @media (max-width: 1200px) {
@@ -88,7 +90,7 @@
 
 @media (max-width: 768px) {
   .container {
-    margin-bottom: 100px;
+    margin-bottom: 20px;
   }
 
   .recipeTitle {

@@ -7,7 +7,7 @@ import { useRecipe } from "../../../contexts/RecipeContext";
 
 interface RecipeActionsProps {
   isFavorite: boolean;
-  toggleFavorite: () => Promise<void>;
+  toggleFavorite: () => Promise<boolean | void>;
   commentCount: number;
   scrollToComments: () => void;
   ratingCount: number;
@@ -30,7 +30,8 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   const { updateFavoriteStatus } = useRecipe();
 
   const handleToggleFavorite = async () => {
-    await toggleFavorite();
+    const success = await toggleFavorite();
+    if (success === false) return;
     updateFavoriteStatus(recipeId, !isFavorite);
     emit("favoriteToggled", { recipeId, isFavorite: !isFavorite });
   };
@@ -40,8 +41,10 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   };
 
   return (
-    <Group p="apart" mt="xl">
-      <Tooltip label={isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}>
+    <Group justify="space-between" mt="xl">
+      <Tooltip
+        label={isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}
+      >
         <ActionIcon
           color={isFavorite ? "red" : "gray"}
           variant="filled"

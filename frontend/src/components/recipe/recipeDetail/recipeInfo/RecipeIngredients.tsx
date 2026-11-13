@@ -42,6 +42,16 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
         }}
       >
         <ScrollArea
+          scrollbars="y"
+          styles={{
+            viewport: {
+              overflowX: "hidden",
+              "& > div": {
+                display: "block !important",
+                width: "100%",
+              },
+            },
+          }}
           style={{
             height: expanded ? "auto" : `${currentHeight}px`,
             maxHeight: expanded ? "none" : `${maxHeight}px`,
@@ -64,7 +74,16 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
             }
           >
             {ingredients.map((ingredient, index) => (
-              <List.Item key={index}>{ingredient}</List.Item>
+              <List.Item
+                key={index}
+                style={{
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
+                {ingredient}
+              </List.Item>
             ))}
           </List>
         </ScrollArea>

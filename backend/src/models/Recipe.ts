@@ -3,6 +3,17 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface IAuthor {
   _id: mongoose.Types.ObjectId | string;
   username: string;
+  name?: string;
+  avatar?: string;
+}
+
+export interface ICommentReply {
+  _id?: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId | IAuthor;
+  text: string;
+  date: Date;
+  likes?: mongoose.Types.ObjectId[];
+  replyTo?: mongoose.Types.ObjectId | IAuthor;
 }
 
 export interface IComment {
@@ -10,6 +21,8 @@ export interface IComment {
   user: mongoose.Types.ObjectId | IAuthor;
   text: string;
   date: Date;
+  likes?: mongoose.Types.ObjectId[];
+  replies?: ICommentReply[];
 }
 
 export interface IRecipe extends Document {
@@ -34,10 +47,20 @@ export interface IRecipe extends Document {
   updatedAt: Date;
 }
 
+const replySchema = new Schema({
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  text: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+  likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  replyTo: { type: Schema.Types.ObjectId, ref: "User" },
+});
+
 const commentSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   text: { type: String, required: true },
   date: { type: Date, default: Date.now },
+  likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  replies: [replySchema],
 });
 
 const RecipeSchema: Schema = new Schema(

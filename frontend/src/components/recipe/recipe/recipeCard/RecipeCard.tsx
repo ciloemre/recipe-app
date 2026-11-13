@@ -3,6 +3,7 @@ import {
   Card,
   Image,
   Text,
+  Avatar,
   Badge,
   Button,
   Group,
@@ -21,6 +22,7 @@ import {
 import { Recipe } from "../../../../types/types";
 import styles from "./RecipeCard.module.css";
 import { useSocket } from "../../../../hooks/useSocket";
+import { displayPersonName } from "../../../../utils/displayName";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -93,12 +95,7 @@ export function RecipeCard({
     setRecipe(initialRecipe);
   }, [initialRecipe]);
 
-  const authorName =
-    typeof recipe.author === "object" && recipe.author !== null
-      ? recipe.author.username
-      : typeof recipe.author === "string"
-      ? recipe.author
-      : "Bilinmeyen Yazar";
+  const authorName = displayPersonName(recipe.author, "Bilinmeyen Şef");
 
   return (
     <Box className={styles.cardContainer}>
@@ -153,15 +150,30 @@ export function RecipeCard({
           {recipe.description}
         </Text>
         <Divider my="sm" />
-        <Text lineClamp={1} size="sm" className={styles.cardAuthor}>
-          <b>Şef:</b> {authorName}
-        </Text>
+        <Group gap={8} wrap="nowrap" className={styles.authorRow}>
+          <Avatar
+            src={
+              typeof recipe.author === "object"
+                ? recipe.author.avatar || null
+                : null
+            }
+            size={28}
+            radius="xl"
+            color="orange"
+          >
+            {authorName.slice(0, 1).toUpperCase()}
+          </Avatar>
+          <Text lineClamp={1} size="sm" className={styles.cardAuthor}>
+            <b>Şef:</b> {authorName}
+          </Text>
+        </Group>
         <div className={styles.cardFooter}>
           <div className={styles.cardStats}>
             <ActionIcon
               color="red"
               variant="subtle"
               onClick={() => onFavoriteToggle(recipe._id)}
+              aria-label={isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}
             >
               {isFavorite ? (
                 <IconHeartFilled size={18} />

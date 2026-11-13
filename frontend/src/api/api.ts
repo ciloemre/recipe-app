@@ -1,8 +1,19 @@
 import axios from "axios";
 import { Recipe, RecipeFormData, User } from "../types/types";
 
-const API_URL = "http://localhost:5003/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5003/api";
 export const TOKEN_KEY = "token";
+
+const PROTECTED_PATH_PREFIXES = [
+  "/profile",
+  "/favorites",
+  "/create",
+  "/create-recipe",
+  "/recipe-form",
+  "/logout",
+  "/settings",
+];
 
 const api = axios.create({
   baseURL: API_URL,
@@ -34,8 +45,26 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
-      window.location.href = "/login";
+      const hadAuth = Boolean(error.config?.headers?.Authorization);
+      if (hadAuth) {
+        localStorage.removeItem(TOKEN_KEY);
+        window.dispatchEvent(new Event("logout"));
+
+        const path = window.location.pathname;
+        const isAuthPage = path === "/login" || path === "/register";
+        const isProtected = PROTECTED_PATH_PREFIXES.some((p) =>
+          path.startsWith(p)
+        );
+
+        // Avoid redirect loops on public browse pages
+        if (isProtected && !isAuthPage) {
+          sessionStorage.setItem(
+            "redirectAfterLogin",
+            path + window.location.search
+          );
+          window.location.href = "/login";
+        }
+      }
     }
     return Promise.reject(error);
   }
@@ -56,11 +85,21 @@ const handleError = (error: unknown, defaultMessage: string): never => {
   throw new Error(defaultMessage);
 };
 
-export const registerUser = async (
-  userData: Omit<User, "_id"> & { password: string }
-): Promise<void> => {
+export const registerUser = async (userData: {
+  username: string;
+  name: string;
+  email: string;
+  password: string;
+}): Promise<User & { token: string }> => {
   try {
-    await api.post("/auth/register", userData);
+    const { username, name, email, password } = userData;
+    const response = await api.post<User & { token: string }>("/auth/register", {
+      username,
+      name,
+      email,
+      password,
+    });
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       console.error("API Hatası:", error.response.data, error.response.status);
@@ -91,6 +130,21 @@ export const loginUser = async (credentials: {
       );
     }
     throw new Error("Giriş sırasında bir hata oluştu");
+  }
+};
+
+export const updateProfile = async (data: {
+  name: string;
+  username: string;
+  avatar?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}): Promise<User> => {
+  try {
+    const response = await api.put<User>("/users/me", data);
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Profil güncellenemedi");
   }
 };
 
@@ -174,7 +228,6 @@ export const toggleFavorite = async (
     const response = await api.post<{ isFavorite: boolean }>(
       `/users/favorites/${recipeId}`
     );
-    console.log("Toggle favorite response:", response.data);
     return response.data;
   } catch (error) {
     return handleError(error, "Favori durumu değiştirilirken bir hata oluştu");
@@ -256,7 +309,137 @@ export const editComment = async (
     );
     return response.data;
   } catch (error) {
-    return handleError(error, "Yorum düzenlenirken bir hata oluştu");
+    return handleError(error, "Yorum düzenilirken bir hata oluştu");
+  }
+};
+
+export const toggleCommentLike = async (
+  recipeId: string,
+  commentId: string
+): Promise<Recipe> => {
+  try {
+    const response = await api.post<Recipe>(
+      `/recipes/${recipeId}/comments/${commentId}/like`
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Yorum beğenilirken bir hata oluştu");
+  }
+};
+
+export const addCommentReply = async (
+  recipeId: string,
+  commentId: string,
+  text: string,
+  replyToUserId?: string,
+  replyToReplyId?: string
+): Promise<Recipe> => {
+  try {
+    const response = await api.post<Recipe>(
+      `/recipes/${recipeId}/comments/${commentId}/replies`,
+      { text, replyToUserId, replyToReplyId }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Cevap eklenirken bir hata oluştu");
+  }
+};
+
+export const toggleReplyLike = async (
+  recipeId: string,
+  commentId: string,
+  replyId: string
+): Promise<Recipe> => {
+  try {
+    const response = await api.post<Recipe>(
+      `/recipes/${recipeId}/comments/${commentId}/replies/${replyId}/like`
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Cevap beğenilirken bir hata oluştu");
+  }
+};
+
+export interface AppNotification {
+  _id: string;
+  type: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  commentId?: string;
+  targetId?: string;
+  sender: { _id: string; name: string; username: string; avatar?: string } | null;
+  recipe: { _id: string; title: string } | null;
+}
+
+export interface NotificationList {
+  notifications: AppNotification[];
+  unreadCount: number;
+}
+
+export const getNotifications = async (): Promise<NotificationList> => {
+  try {
+    const response = await api.get<NotificationList>("/notifications");
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Bildirimler alınamadı");
+  }
+};
+
+export const markNotificationRead = async (id: string): Promise<void> => {
+  try {
+    await api.patch(`/notifications/${id}/read`);
+  } catch (error) {
+    return handleError(error, "Bildirim okunamadı");
+  }
+};
+
+export const markAllNotificationsRead = async (): Promise<void> => {
+  try {
+    await api.patch("/notifications/read-all");
+  } catch (error) {
+    return handleError(error, "Bildirimler okunamadı");
+  }
+};
+
+export const getFollowStatus = async (
+  userId: string
+): Promise<{
+  followerCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+}> => {
+  try {
+    const response = await api.get(`/users/${userId}/follow`);
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Takip bilgisi alınamadı");
+  }
+};
+
+export const toggleFollow = async (
+  userId: string
+): Promise<{ followerCount: number; isFollowing: boolean }> => {
+  try {
+    const response = await api.post(`/users/${userId}/follow`);
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Takip işlemi tamamlanamadı");
+  }
+};
+
+export const deleteCommentReply = async (
+  recipeId: string,
+  commentId: string,
+  replyId: string
+): Promise<Recipe> => {
+  try {
+    const response = await api.delete<Recipe>(
+      `/recipes/${recipeId}/comments/${commentId}/replies/${replyId}`
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Cevap silinirken bir hata oluştu");
   }
 };
 
@@ -271,6 +454,6 @@ export const logoutUser = async (): Promise<void> => {
   } finally {
     localStorage.removeItem(TOKEN_KEY);
     window.dispatchEvent(new Event("logout"));
-    window.location.href = "/login";
+    window.location.href = "/home";
   }
 };

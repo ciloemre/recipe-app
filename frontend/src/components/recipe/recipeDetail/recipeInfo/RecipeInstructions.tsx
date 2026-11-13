@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Title, List, Box, Button, ScrollArea } from "@mantine/core";
+import { Title, Box, Button, ScrollArea } from "@mantine/core";
 
 interface RecipeInstructionsProps {
   instructions: string[];
@@ -42,17 +42,67 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
         }}
       >
         <ScrollArea
+          scrollbars="y"
+          styles={{
+            viewport: {
+              overflowX: "hidden",
+              "& > div": {
+                display: "block !important",
+                width: "100%",
+              },
+            },
+          }}
           style={{
             height: expanded ? "auto" : `${currentHeight}px`,
             maxHeight: expanded ? "none" : `${maxHeight}px`,
             transition: "height 0.3s ease-in-out",
           }}
         >
-          <List ref={listRef} type="ordered" withPadding spacing="md">
+          <Box
+            component="ol"
+            ref={listRef}
+            style={{
+              margin: 0,
+              padding: 0,
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
             {instructions.map((step, index) => (
-              <List.Item key={index}>{step}</List.Item>
+              <li
+                key={index}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                }}
+              >
+                <span
+                  style={{
+                    flex: "0 0 auto",
+                    minWidth: 20,
+                    fontWeight: 700,
+                    lineHeight: 1.55,
+                    color: "var(--mantine-color-orange-6)",
+                  }}
+                >
+                  {index + 1}.
+                </span>
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    lineHeight: 1.55,
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  {step}
+                </span>
+              </li>
             ))}
-          </List>
+          </Box>
         </ScrollArea>
 
         {showButton && (

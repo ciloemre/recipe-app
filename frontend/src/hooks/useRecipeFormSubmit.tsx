@@ -8,10 +8,12 @@ import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { Recipe } from "../types/types";
 import { useSocket } from "./useSocket";
+import { useRequireAuth } from "./useRequireAuth";
 
 export function useRecipeFormSubmit() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { requireAuth } = useRequireAuth();
   const { setRecipes } = useRecipe();
   const { formData, handleChange, handleArrayChange, handleArrayAction } =
     useRecipeForm();
@@ -21,14 +23,7 @@ export function useRecipeFormSubmit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateRecipeForm(formData)) return;
-    if (!user) {
-      notifications.show({
-        title: "Error",
-        message: "You must be logged in to create a recipe.",
-        color: "red",
-        icon: <IconX size="1.1rem" />,
-      });
-      navigate("/login");
+    if (!requireAuth() || !user) {
       return;
     }
     try {

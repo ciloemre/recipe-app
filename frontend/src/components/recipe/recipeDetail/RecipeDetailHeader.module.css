@@ -1,12 +1,34 @@
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .badgeGroup {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
   gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-@media (max-width: 768px) {
-  .badgeGroup {
+.actions {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 48em) {
+  .top {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .badgeGroup,
+  .actions {
+    flex: 0 0 auto;
+    width: 100%;
   }
 }

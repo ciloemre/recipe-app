@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useEffect } from "react";
 import { Container, Paper, Stack, ActionIcon } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { RecipeHeader } from "../components/recipe/recipeDetail/RecipeDetailHeader";
 import { RecipeImage } from "../components/recipe/recipeDetail/RecipeImage";
 import { RecipeActions } from "../components/recipe/recipeDetail/RecipeDetailActions";
@@ -16,9 +16,11 @@ import { useAuth } from "../contexts/AuthContext";
 import { useFavoriteActions } from "../hooks/recipeDetailHooks/useFavoriteActions";
 import { useRatingActions } from "../hooks/recipeDetailHooks/useRatingActions";
 import { useSocket } from "../hooks/useSocket";
+import { patchRecipeWithUser, UserUpdate } from "../utils/patchUser";
 
 const RecipeDetailPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const initialEditMode = searchParams.get("edit") === "true";
@@ -32,6 +34,8 @@ const RecipeDetailPage: React.FC = () => {
   const { on, off } = useSocket();
 
   const commentSectionRef = useRef<HTMLDivElement>(null);
+  const recipeIdRef = useRef(recipe?._id);
+  recipeIdRef.current = recipe?._id;
 
   const handleRefreshRecipe = useCallback(async () => {
     const scrollPosition = window.pageYOffset;
@@ -42,6 +46,35 @@ const RecipeDetailPage: React.FC = () => {
   const scrollToComments = () => {
     commentSectionRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    if (!recipe || isLoading) return;
+    const match = location.hash.match(/^#comment-(.+)$/);
+    if (!match) return;
+    const commentId = decodeURIComponent(match[1]);
+    let tries = 0;
+    let frame = 0;
+    const tick = () => {
+      const node = document.getElementById(`comment-${commentId}`);
+      if (node) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+        node.animate(
+          [
+            { backgroundColor: "rgba(253, 126, 20, 0.28)" },
+            { backgroundColor: "rgba(253, 126, 20, 0)" },
+          ],
+          { duration: 1600, easing: "ease-out" }
+        );
+        return;
+      }
+      if (tries < 12) {
+        tries += 1;
+        frame = window.requestAnimationFrame(tick);
+      }
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [recipe, isLoading, location.hash, location.state]);
 
   useEffect(() => {
     if (recipe) {
@@ -70,12 +103,31 @@ const RecipeDetailPage: React.FC = () => {
         }
       };
 
+      const handleUserUpdated = (update: UserUpdate) => {
+        setRecipe((prevRecipe) =>
+          prevRecipe ? patchRecipeWithUser(prevRecipe, update) : prevRecipe
+        );
+      };
+
+      const handleLiveRecipe = (updated: { _id?: string; comments?: unknown }) => {
+        if (!updated?._id || String(updated._id) !== String(recipeIdRef.current)) {
+          return;
+        }
+        if (Array.isArray(updated.comments)) {
+          setRecipe(updated as typeof recipe);
+        }
+      };
+
       on("recipeUpdated", handleRecipeUpdate);
       on("recipeRated", handleRatingUpdate);
+      on("userUpdated", handleUserUpdated);
+      on("commentUpdated", handleLiveRecipe);
 
       return () => {
         off("recipeUpdated", handleRecipeUpdate);
         off("recipeRated", handleRatingUpdate);
+        off("userUpdated", handleUserUpdated);
+        off("commentUpdated", handleLiveRecipe);
       };
     }
   }, [recipe, on, off, setRecipe]);
@@ -142,6 +194,7 @@ const RecipeDetailPage: React.FC = () => {
             comments={recipe.comments}
             recipeId={recipe._id}
             refreshRecipe={handleRefreshRecipe}
+            onRecipeChange={setRecipe}
           />
         </Stack>
       </Paper>

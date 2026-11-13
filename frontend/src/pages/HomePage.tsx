@@ -4,7 +4,6 @@ import { QuickCategories } from "../components/recipe/home/quickCategories/Quick
 import { RecipeDiscovery } from "../components/recipe/home/recipeDiscovery/RecipeDiscovery";
 import { CookingTips } from "../components/recipe/home/cookingTips/CookingTips";
 import { LatestRecipes } from "../components/recipe/home/latestRecipes/LatestRecipes";
-import { SocialMediaFollow } from "../components/recipe/home/socialMedia/SocialMediaFollow";
 
 export function HomePage() {
   return (
@@ -15,7 +14,6 @@ export function HomePage() {
         <RecipeDiscovery />
         <CookingTips />
         <LatestRecipes />
-        <SocialMediaFollow />
       </Box>
     </Flex>
   );

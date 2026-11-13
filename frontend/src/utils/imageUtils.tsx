@@ -1,7 +1,10 @@
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 1024;
 
-export const resizeImage = async (file: File): Promise<string> => {
+export const resizeImage = async (
+  file: File,
+  maxDimension = MAX_IMAGE_DIMENSION
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (file.size > MAX_IMAGE_SIZE) {
       reject(new Error("Fotoğraf boyutu çok büyük"));
@@ -15,13 +18,13 @@ export const resizeImage = async (file: File): Promise<string> => {
         let width = img.width;
         let height = img.height;
 
-        if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        if (width > maxDimension || height > maxDimension) {
           if (width > height) {
-            height *= MAX_IMAGE_DIMENSION / width;
-            width = MAX_IMAGE_DIMENSION;
+            height *= maxDimension / width;
+            width = maxDimension;
           } else {
-            width *= MAX_IMAGE_DIMENSION / height;
-            height = MAX_IMAGE_DIMENSION;
+            width *= maxDimension / height;
+            height = maxDimension;
           }
         }
 

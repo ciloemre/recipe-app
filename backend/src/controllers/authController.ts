@@ -5,6 +5,11 @@ import { CustomError } from "../utils/customError";
 
 const authService = new AuthService();
 
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\sA-Za-z0-9]).{8,}$/;
+
 export const register = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { username, name, email, password } = req.body;
@@ -13,10 +18,39 @@ export const register = asyncHandler(
       return res.status(400).json({ message: "Tüm alanlar zorunludur" });
     }
 
+    if (typeof name !== "string" || name.trim().length < 2) {
+      return res
+        .status(400)
+        .json({ message: "İsim en az 2 karakter olmalıdır" });
+    }
+
+    if (typeof username !== "string" || username.length < 3) {
+      return res
+        .status(400)
+        .json({ message: "Kullanıcı adı en az 3 karakter olmalıdır" });
+    }
+
+    if (!USERNAME_REGEX.test(username)) {
+      return res.status(400).json({
+        message: "Kullanıcı adı yalnızca harf, rakam ve alt çizgi içerebilir",
+      });
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ message: "Geçersiz email formatı" });
+    }
+
+    if (!PASSWORD_REGEX.test(password)) {
+      return res.status(400).json({
+        message:
+          "Şifre en az 8 karakter olmalı ve büyük/küçük harf, rakam ile özel karakter içermelidir",
+      });
+    }
+
     try {
       const { user, token } = await authService.register({
         username,
-        name,
+        name: name.trim(),
         email,
         password,
       });

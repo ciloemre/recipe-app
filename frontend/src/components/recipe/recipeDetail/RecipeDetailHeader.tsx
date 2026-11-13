@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex, Group, Badge, Button, Title } from "@mantine/core";
+import { Group, Badge, Button, Title } from "@mantine/core";
 import {
   IconChefHat,
   IconCalendar,
@@ -10,6 +10,8 @@ import { Recipe } from "../../../types/types";
 import { openDeleteConfirmModal } from "../../../utils/modals";
 import { notifications } from "@mantine/notifications";
 import styles from "./RecipeDetailHeader.module.css";
+import { displayPersonName } from "../../../utils/displayName";
+import { AuthorFollow } from "./AuthorFollow";
 
 interface RecipeHeaderProps {
   recipe: Recipe;
@@ -24,10 +26,9 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
   onEditClick,
   onDeleteClick,
 }) => {
-  const authorName =
-    typeof recipe.author === "object" && recipe.author !== null
-      ? recipe.author.username || "Bilinmeyen Şef"
-      : recipe.author || "Bilinmeyen Şef";
+  const authorName = displayPersonName(recipe.author, "Bilinmeyen Şef");
+  const authorId =
+    typeof recipe.author === "string" ? recipe.author : recipe.author?._id;
 
   const handleDeleteClick = () => {
     openDeleteConfirmModal("Tarifi", () => {
@@ -47,7 +48,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
 
   return (
     <>
-      <Flex justify="space-between" align="flex-start">
+      <div className={styles.top}>
         <div className={styles.badgeGroup}>
           <Badge
             leftSection={<IconChefHat size={16} />}
@@ -57,6 +58,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
           >
             {authorName}
           </Badge>
+          {authorId && <AuthorFollow authorId={authorId} />}
           <Badge
             leftSection={<IconCalendar size={16} />}
             variant="light"
@@ -75,7 +77,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
           </Badge>
         </div>
         {isAuthor && (
-          <Group>
+          <Group className={styles.actions} gap="xs" wrap="wrap">
             <Button
               variant="light"
               color="orange"
@@ -96,7 +98,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
             </Button>
           </Group>
         )}
-      </Flex>
+      </div>
       <Title lineClamp={1} order={1} mt="lg">
         {recipe.title}
       </Title>

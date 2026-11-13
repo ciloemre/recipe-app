@@ -15,6 +15,11 @@ import { IconChefHat } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+import { REDIRECT_KEY } from "../hooks/useRequireAuth";
+import {
+  LOGIN_WELCOME_PENDING_KEY,
+  WELCOME_NAME_KEY,
+} from "../utils/welcome";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,23 +27,32 @@ const LoginPage: React.FC = () => {
   const { login, user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate("/");
+    if (!user) return;
+    if (
+      sessionStorage.getItem(WELCOME_NAME_KEY) ||
+      sessionStorage.getItem(LOGIN_WELCOME_PENDING_KEY)
+    ) {
+      return;
     }
+    const saved = sessionStorage.getItem(REDIRECT_KEY);
+    if (saved) sessionStorage.removeItem(REDIRECT_KEY);
+    navigate(saved || "/home", { replace: true });
   }, [user, navigate]);
 
   const handleSubmit = async (email: string, password: string) => {
+    sessionStorage.setItem(LOGIN_WELCOME_PENDING_KEY, "1");
     try {
-      console.log("Login attempt with:", email);
-      await login(email, password);
-      console.log("Login successful");
+      const loggedIn = await login(email, password);
+      sessionStorage.setItem(WELCOME_NAME_KEY, loggedIn.name);
+      sessionStorage.removeItem(LOGIN_WELCOME_PENDING_KEY);
       notifications.show({
         title: "Başarılı",
         message: "Giriş yapıldı",
         color: "green",
       });
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
+      sessionStorage.removeItem(LOGIN_WELCOME_PENDING_KEY);
       console.error("Giriş hatası:", error);
       let errorMessage = "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.";
       if (axios.isAxiosError(error) && error.response) {
@@ -51,6 +65,7 @@ const LoginPage: React.FC = () => {
       });
     }
   };
+
   const handleRegisterClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     navigate("/register");
@@ -63,6 +78,8 @@ const LoginPage: React.FC = () => {
   return (
     <Box
       style={{
+        position: "absolute",
+        inset: 0,
         width: "100vw",
         height: "100vh",
         overflow: "hidden",
@@ -70,10 +87,9 @@ const LoginPage: React.FC = () => {
         backgroundPosition: "center",
         backgroundImage:
           "url(https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80)",
-        position: "absolute",
       }}
     >
-      <Container size={1100} pos="relative" style={{ height: "100%" }}>
+      <Container size={1100} style={{ height: "100%" }}>
         <Paper
           radius={0}
           p="30px"
@@ -81,6 +97,7 @@ const LoginPage: React.FC = () => {
             borderRight: `1px solid ${theme.colors.gray[3]}`,
             height: "100%",
             maxWidth: "450px",
+            overflowY: "auto",
           }}
         >
           <Center>
@@ -88,7 +105,6 @@ const LoginPage: React.FC = () => {
               style={{
                 width: "120px",
                 height: "120px",
-                fontSize: "120px",
                 marginBottom: theme.spacing.lg,
                 color: theme.black,
               }}
@@ -111,7 +127,7 @@ const LoginPage: React.FC = () => {
 
           <LoginForm onSubmit={handleSubmit} />
 
-          <Group p="apart" m="30px" mt="xl">
+          <Group justify="space-between" mt="xl">
             <Anchor href="#" onClick={handleRegisterClick} size="xs">
               Hesabınız yok mu? Kayıt olun
             </Anchor>
@@ -123,6 +139,16 @@ const LoginPage: React.FC = () => {
               Şifrenizi mi unuttunuz?
             </Anchor>
           </Group>
+          <Anchor
+            component="button"
+            type="button"
+            size="sm"
+            mt="lg"
+            onClick={() => navigate("/recipes")}
+            style={{ display: "block", width: "100%", textAlign: "center" }}
+          >
+            Giriş yapmadan tariflere göz at
+          </Anchor>
         </Paper>
       </Container>
     </Box>

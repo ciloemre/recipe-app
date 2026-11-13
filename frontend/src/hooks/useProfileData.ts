@@ -8,7 +8,8 @@ import {
 } from "../api/api";
 import { Recipe, User } from "../types/types";
 import { sortByCreatedAt } from "../utils/formatRecipeData";
-import { useSocket } from "../hooks/useSocket";
+import { useSocket } from "./useSocket";
+import { patchRecipeWithUser, UserUpdate } from "../utils/patchUser";
 
 export function useProfileData() {
   const [userData, setUserData] = useState<User | null>(null);
@@ -91,12 +92,20 @@ export function useProfileData() {
       "commentDeleted",
     ];
 
+    const handleUserUpdated = (update: UserUpdate) => {
+      const apply = (recipes: Recipe[]) =>
+        recipes.map((recipe) => patchRecipeWithUser(recipe, update));
+      setUserRecipes(apply);
+      setFavoriteRecipes(apply);
+    };
+
     events.forEach((event) => {
       on(
         event,
         event === "recipeDeleted" ? handleRecipeDelete : handleRecipeUpdate
       );
     });
+    on("userUpdated", handleUserUpdated);
 
     return () => {
       events.forEach((event) => {
@@ -105,6 +114,7 @@ export function useProfileData() {
           event === "recipeDeleted" ? handleRecipeDelete : handleRecipeUpdate
         );
       });
+      off("userUpdated", handleUserUpdated);
     };
   }, [on, off, updateRecipe, removeRecipe]);
 
@@ -143,5 +153,6 @@ export function useProfileData() {
     fetchUserDataAndRecipes,
     updateRecipe,
     removeRecipe,
+    setUserData,
   };
 }

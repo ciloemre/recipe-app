@@ -6,6 +6,8 @@ import { ProfileTabs } from "../components/recipe/profile/ProfileTabs";
 import { MyRecipesList } from "../components/recipe/profile/MyRecipesList";
 import { useSocket } from "../hooks/useSocket";
 import FavoritesPage from "./FavoritesPage";
+import { useAuth } from "../contexts/AuthContext";
+import { User } from "../types/types";
 
 export function ProfilePage() {
   const {
@@ -18,7 +20,9 @@ export function ProfilePage() {
     updateRecipe,
     removeRecipe,
     fetchUserDataAndRecipes,
+    setUserData,
   } = useProfileData();
+  const { updateCurrentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<string | null>("myRecipes");
   const { on, off } = useSocket();
 
@@ -57,7 +61,13 @@ export function ProfilePage() {
 
   return (
     <Container size={"90%"}>
-      <ProfileHeader user={userData} />
+      <ProfileHeader
+        user={userData}
+        onUserUpdated={(user: User) => {
+          setUserData(user);
+          updateCurrentUser(user);
+        }}
+      />
       <Box mt="xl" p="md">
         <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <Box mt="md">

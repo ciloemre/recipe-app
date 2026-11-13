@@ -9,6 +9,7 @@ import connectDB from "./config/database";
 import authRoutes from "./routes/authRoutes";
 import recipeRoutes from "./routes/recipeRoutes";
 import userRoutes from "./routes/userRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import { errorHandler } from "./middleware/errorMiddleware";
 
 dotenv.config();
@@ -27,7 +28,7 @@ app.use(limiter);
 const corsOptions = {
   origin: "http://localhost:5173",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
@@ -45,6 +46,31 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("A user connected");
+
+  const joinUserRoom = (payload: unknown) => {
+    const raw =
+      typeof payload === "string"
+        ? payload
+        : payload && typeof payload === "object"
+          ? "userId" in payload
+            ? (payload as { userId?: unknown }).userId
+            : "_id" in payload
+              ? (payload as { _id?: unknown })._id
+              : ""
+          : "";
+    const userId = String(
+      raw && typeof raw === "object" && "_id" in raw
+        ? (raw as { _id?: unknown })._id
+        : raw || ""
+    );
+    if (/^[a-f\d]{24}$/i.test(userId)) {
+      socket.join(`user_${userId}`);
+    }
+  };
+
+  socket.on("identify", joinUserRoom);
+  socket.on("authenticate", joinUserRoom);
+  socket.on("joinUserRoom", joinUserRoom);
 
   socket.on("recipeRated", (data) => {
     console.log("Recipe rated:", data);
@@ -64,6 +90,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
@@ -72,7 +99,9 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 connectDB()
-  .then(() => console.log("Connected to MongoDB"))
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const PORT = process.env.PORT || 5003;

@@ -20,6 +20,14 @@
   font-weight: bold;
 }
 
+.authorRow {
+  min-width: 0;
+}
+
+.cardAuthor {
+  min-width: 0;
+}
+
 .cardFooter {
   margin-top: auto;
   display: flex;

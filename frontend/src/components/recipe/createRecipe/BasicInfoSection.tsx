@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { CustomInput } from "../../atoms/CustomInput";
 import { CustomTextarea } from "../../atoms/CustomTextarea";
-import { FileInput, Select, Text, Box } from "@mantine/core";
+import { FileButton, Button, Image, Select, Text, Box, Group } from "@mantine/core";
+import { IconUpload } from "@tabler/icons-react";
 import { RecipeFormData } from "../../../types/types";
 import { resizeImage } from "../../../utils/imageUtils";
 
@@ -43,6 +44,7 @@ export function BasicInfoSection({
 }: BasicInfoSectionProps) {
   const [title, setTitle] = useState(formData.title);
   const [titleLength, setTitleLength] = useState(formData.title.length);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   useEffect(() => {
     setTitle(formData.title);
@@ -60,19 +62,20 @@ export function BasicInfoSection({
   };
 
   const handleImageUpload = async (file: File | null) => {
-    if (file) {
-      try {
-        const resizedImage = await resizeImage(file);
-        onImageUpload(file);
-        onInputChange({
-          target: { name: "image", value: resizedImage },
-        } as React.ChangeEvent<HTMLInputElement>);
-      } catch (error) {
-        console.error("Resim yükleme hatası:", error);
-        onInputChange({
-          target: { name: "image", value: "" },
-        } as React.ChangeEvent<HTMLInputElement>);
-      }
+    if (!file) return;
+    setFileName(file.name);
+    try {
+      const resizedImage = await resizeImage(file);
+      onImageUpload(file);
+      onInputChange({
+        target: { name: "image", value: resizedImage },
+      } as React.ChangeEvent<HTMLInputElement>);
+    } catch (error) {
+      console.error("Resim yükleme hatası:", error);
+      setFileName(null);
+      onInputChange({
+        target: { name: "image", value: "" },
+      } as React.ChangeEvent<HTMLInputElement>);
     }
   };
 
@@ -112,12 +115,46 @@ export function BasicInfoSection({
         required
         mb="md"
       />
-      <FileInput
-        label="Resim Yükle"
-        accept="image/*"
-        onChange={handleImageUpload}
-        mb="md"
-      />
+      <Box mb="md">
+        <Text size="sm" fw={500} mb={6}>
+          Resim Yükle
+        </Text>
+        <Group gap="sm" align="center">
+          <FileButton
+            onChange={handleImageUpload}
+            accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+          >
+            {(props) => (
+              <Button
+                {...props}
+                type="button"
+                variant="light"
+                color="orange"
+                leftSection={<IconUpload size={16} />}
+              >
+                Dosya seç
+              </Button>
+            )}
+          </FileButton>
+          <Text size="sm" c="dimmed">
+            {fileName ?? "PNG, JPG veya WEBP"}
+          </Text>
+        </Group>
+        <Text size="xs" c="dimmed" mt={6}>
+          Tıklayınca bilgisayarınızdaki resimler açılır.
+        </Text>
+        {formData.image ? (
+          <Image
+            src={formData.image}
+            alt="Seçilen tarif görseli"
+            h={140}
+            w={220}
+            radius="md"
+            mt="sm"
+            fit="cover"
+          />
+        ) : null}
+      </Box>
     </>
   );
 }

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Outlet,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme/theme";
@@ -16,26 +17,38 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.tsx";
-// import SettingsPage from "./pages/SettingsPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RecipeProvider } from "./contexts/RecipeContext";
 import RecipePage from "./pages/RecipePage.tsx";
 import SplashScreen from "./pages/SplashScreen";
 import LogoutPage from "./pages/LogoutPage.tsx";
+import { ProtectedRoute } from "./components/recipe/ProtectedRoute";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/notifications/styles.css";
 
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) return;
+    window.scrollTo(0, 0);
+  }, [pathname, hash]);
+
+  return null;
+}
+
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <RecipeProvider>
-        <MantineProvider theme={theme}>
-          <Notifications />
-          <ModalsProvider>
+    <MantineProvider theme={theme}>
+      <Notifications />
+      <ModalsProvider>
+        <AuthProvider>
+          <RecipeProvider>
             <Router>
+              <ScrollToTop />
               <Routes>
-                <Route path="/" element={<SplashScreen />} />{" "}
+                <Route path="/" element={<SplashScreen />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
@@ -45,24 +58,58 @@ const App: React.FC = () => {
                     </Layout>
                   }
                 >
-                  <Route path="/home" element={<HomePage />} />{" "}
+                  <Route path="/home" element={<HomePage />} />
                   <Route path="/recipes" element={<RecipePage />} />
                   <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-                  <Route path="/favorites" element={<FavoriteRecipesPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/create" element={<CreateRecipePage />} />
-                  <Route path="/create-recipe" element={<CreateRecipePage />} />
-                  <Route path="/recipe-form" element={<CreateRecipePage />} />
-                  {/* <Route path="/settings" element={<SettingsPage />} /> */}
+                  <Route
+                    path="/favorites"
+                    element={
+                      <ProtectedRoute>
+                        <FavoriteRecipesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/create"
+                    element={
+                      <ProtectedRoute>
+                        <CreateRecipePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/create-recipe"
+                    element={
+                      <ProtectedRoute>
+                        <CreateRecipePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/recipe-form"
+                    element={
+                      <ProtectedRoute>
+                        <CreateRecipePage />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/logout" element={<LogoutPage />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />{" "}
+                <Route path="*" element={<Navigate to="/home" replace />} />
               </Routes>
             </Router>
-          </ModalsProvider>
-        </MantineProvider>
-      </RecipeProvider>
-    </AuthProvider>
+          </RecipeProvider>
+        </AuthProvider>
+      </ModalsProvider>
+    </MantineProvider>
   );
 };
 

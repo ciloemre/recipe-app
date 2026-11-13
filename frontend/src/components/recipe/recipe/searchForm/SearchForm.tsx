@@ -45,8 +45,8 @@ export function SearchForm({ onSearch }: SearchFormProps) {
   const [sortBy, setSortBy] = useState("newest");
 
   const debouncedSearch = useDebounce(
-    (query: string, category: string, sortBy: string) => {
-      onSearch(query, category, sortBy);
+    (query: string, cat: string, sort: string) => {
+      onSearch(query, cat, sort);
     },
     300
   );

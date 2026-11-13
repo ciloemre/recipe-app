@@ -15,10 +15,14 @@ import { useEffect, useState } from "react";
 import { getLatestRecipes } from "../../../../utils/recipeUtils";
 import { ExtendedRecipe } from "../../../../types/types";
 import styles from "./LatestRecipes.module.css";
+import { displayPersonName } from "../../../../utils/displayName";
+import { useSocket } from "../../../../hooks/useSocket";
+import { patchRecipeWithUser, UserUpdate } from "../../../../utils/patchUser";
 
 export function LatestRecipes() {
   const [latestRecipes, setLatestRecipes] = useState<ExtendedRecipe[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { on, off, isConnected } = useSocket();
 
   useEffect(() => {
     const fetchLatestRecipes = async () => {
@@ -28,8 +32,8 @@ export function LatestRecipes() {
           ...recipe,
           author:
             typeof recipe.author === "string"
-              ? { _id: "", username: recipe.author, avatar: undefined }
-              : { ...recipe.author, avatar: undefined },
+              ? { _id: "", username: recipe.author }
+              : recipe.author,
           difficulty: "Normal",
         }));
         setLatestRecipes(extendedRecipes);
@@ -42,6 +46,22 @@ export function LatestRecipes() {
     };
     fetchLatestRecipes();
   }, []);
+
+  useEffect(() => {
+    if (!isConnected) return;
+    const handleUserUpdated = (update: UserUpdate) => {
+      setLatestRecipes((prev) =>
+        prev.map((recipe) => {
+          const patched = patchRecipeWithUser(recipe, update);
+          const author =
+            typeof patched.author === "object" ? patched.author : recipe.author;
+          return { ...patched, author, difficulty: recipe.difficulty };
+        })
+      );
+    };
+    on("userUpdated", handleUserUpdated);
+    return () => off("userUpdated", handleUserUpdated);
+  }, [isConnected, on, off]);
 
   return (
     <Container className={styles.container} size={"xl"}>
@@ -73,8 +93,19 @@ export function LatestRecipes() {
               </Card.Section>
 
               <Group className={styles.authorInfo}>
-                <Avatar src={recipe.author.avatar} radius="xl" />
-                <Text size="sm">{recipe.author.username}</Text>
+                <Avatar
+                  src={recipe.author.avatar || null}
+                  radius="xl"
+                  size="sm"
+                  color="orange"
+                >
+                  {displayPersonName(recipe.author, "Bilinmeyen Şef")
+                    .slice(0, 1)
+                    .toUpperCase()}
+                </Avatar>
+                <Text size="sm" lineClamp={1}>
+                  {displayPersonName(recipe.author, "Bilinmeyen Şef")}
+                </Text>
               </Group>
               <Group p="apart" mt="md" mb="xs">
                 <Text className={styles.recipeTitle}>{recipe.title}</Text>

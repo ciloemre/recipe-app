@@ -1,0 +1,11 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+}
+
+.page {
+  flex: 1 0 auto;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}

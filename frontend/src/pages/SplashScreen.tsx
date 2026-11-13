@@ -1,32 +1,30 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Box, Text, Container } from "@mantine/core";
-import { getUser } from "../api/api";
 import styles from "./SplashScreen.module.css";
+import {
+  REDIRECT_AFTER_LOGIN_KEY,
+  WELCOME_NAME_KEY,
+} from "../utils/welcome";
 
 export function SplashScreen() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
+  const [userName] = useState(() => sessionStorage.getItem(WELCOME_NAME_KEY));
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getUser();
-        setUserName(userData.name);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setUserName("Misafir");
-      }
-    };
-
-    fetchUserData();
-
+    if (!userName) return;
+    sessionStorage.removeItem(WELCOME_NAME_KEY);
     const timer = setTimeout(() => {
-      navigate("/home");
+      const saved = sessionStorage.getItem(REDIRECT_AFTER_LOGIN_KEY);
+      if (saved) sessionStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY);
+      navigate(saved || "/home", { replace: true });
     }, 5000);
-
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, userName]);
+
+  if (!userName) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <Box className={styles.container}>

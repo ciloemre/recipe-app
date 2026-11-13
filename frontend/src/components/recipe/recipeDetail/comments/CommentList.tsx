@@ -7,6 +7,15 @@ interface CommentListProps {
   comments: Comment[];
   onDelete: (commentId: string) => void;
   onEdit: (commentId: string) => void;
+  onLike: (commentId: string) => void;
+  onReply: (
+    commentId: string,
+    text: string,
+    replyToUserId?: string,
+    replyToReplyId?: string
+  ) => Promise<boolean | void> | boolean | void;
+  onLikeReply: (commentId: string, replyId: string) => void;
+  onDeleteReply: (commentId: string, replyId: string) => void;
   currentUser: User | null;
 }
 
@@ -14,6 +23,10 @@ export const CommentList: React.FC<CommentListProps> = ({
   comments,
   onDelete,
   onEdit,
+  onLike,
+  onReply,
+  onLikeReply,
+  onDeleteReply,
   currentUser,
 }) => {
   const sortedComments = useMemo(() => {
@@ -37,6 +50,10 @@ export const CommentList: React.FC<CommentListProps> = ({
               comment={comment}
               onDelete={onDelete}
               onEdit={onEdit}
+              onLike={onLike}
+              onReply={onReply}
+              onLikeReply={onLikeReply}
+              onDeleteReply={onDeleteReply}
               currentUser={currentUser}
               style={styles}
             />

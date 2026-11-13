@@ -1,84 +1,87 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:5003";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5003";
+
+let sharedSocket: Socket | null = null;
+let activeUserId: string | null = null;
+
+function joinRoom(socket: Socket) {
+  if (!socket.connected || !activeUserId) return;
+  socket.emit("authenticate", activeUserId);
+  socket.emit("joinUserRoom", activeUserId);
+}
+
+function getSharedSocket() {
+  if (!sharedSocket) {
+    sharedSocket = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      timeout: 10000,
+    });
+    sharedSocket.on("connect", () => {
+      if (sharedSocket) joinRoom(sharedSocket);
+    });
+  }
+  return sharedSocket;
+}
+
+export function bindSocketUser(userId?: string | null) {
+  activeUserId =
+    userId && /^[a-f\d]{24}$/i.test(userId) ? userId : null;
+  joinRoom(getSharedSocket());
+}
 
 export const useSocket = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
-  const reconnectAttempts = useRef(0);
-
-  const connect = useCallback(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(SOCKET_URL, {
-        withCredentials: true,
-        transports: ["websocket"],
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        timeout: 10000,
-      });
-
-      socketRef.current.on("connect", () => {
-        console.log("Connected to Socket.IO server");
-        setIsConnected(true);
-        reconnectAttempts.current = 0;
-      });
-
-      socketRef.current.on("disconnect", (reason) => {
-        console.log("Disconnected from Socket.IO server:", reason);
-        setIsConnected(false);
-      });
-
-      socketRef.current.on("connect_error", (error) => {
-        console.error("Socket.IO connection error:", error);
-        setIsConnected(false);
-        reconnectAttempts.current++;
-        if (reconnectAttempts.current > 5) {
-          socketRef.current?.disconnect();
-        }
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    connect();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [connect]);
-
-  const emit = useCallback(
-    (eventName: string, data: any) => {
-      if (socketRef.current && isConnected) {
-        socketRef.current.emit(eventName, data);
-      } else {
-        console.warn(
-          "Socket is not connected. Unable to emit event:",
-          eventName
-        );
-      }
-    },
-    [isConnected]
+  const [isConnected, setIsConnected] = useState(
+    () => getSharedSocket().connected
   );
 
-  const on = useCallback((eventName: string, callback: (data: any) => void) => {
-    if (socketRef.current) {
-      socketRef.current.on(eventName, callback);
+  useEffect(() => {
+    const socket = getSharedSocket();
+    const handleConnect = () => setIsConnected(true);
+    const handleDisconnect = () => setIsConnected(false);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    setIsConnected(socket.connected);
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+    };
+  }, []);
+
+  const emit = useCallback((eventName: string, data: unknown) => {
+    const socket = getSharedSocket();
+    if (socket.connected) {
+      socket.emit(eventName, data);
     }
   }, []);
 
-  const off = useCallback(
+  const on = useCallback(
     (eventName: string, callback: (data: any) => void) => {
-      if (socketRef.current) {
-        socketRef.current.off(eventName, callback);
-      }
+      getSharedSocket().on(eventName, callback);
     },
     []
   );
 
-  return { emit, on, off, isConnected };
+  const off = useCallback(
+    (eventName: string, callback: (data: any) => void) => {
+      getSharedSocket().off(eventName, callback);
+    },
+    []
+  );
+
+  const subscribeConnect = useCallback((handler: () => void) => {
+    const socket = getSharedSocket();
+    socket.on("connect", handler);
+    if (socket.connected) handler();
+    return () => {
+      socket.off("connect", handler);
+    };
+  }, []);
+
+  return { emit, on, off, isConnected, subscribeConnect };
 };

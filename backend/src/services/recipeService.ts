@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 export class RecipeService {
   async getAllRecipes(): Promise<IRecipe[]> {
-    return Recipe.find().populate("author", "username").sort({ createdAt: -1 });
+    return Recipe.find().populate("author", "username name avatar").sort({ createdAt: -1 });
   }
 
   async createRecipe(
@@ -15,13 +15,15 @@ export class RecipeService {
       author: new mongoose.Types.ObjectId(authorId),
     });
     await recipe.save();
-    return recipe.populate("author", "username");
+    return recipe.populate("author", "username name avatar");
   }
 
   async getRecipeById(id: string): Promise<IRecipe | null> {
     return Recipe.findById(id)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
   }
 
   async updateRecipe(
@@ -40,8 +42,10 @@ export class RecipeService {
     await recipe.save();
 
     return Recipe.findById(id)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
   }
 
   async deleteRecipe(id: string, userId: string): Promise<boolean> {
@@ -69,13 +73,17 @@ export class RecipeService {
       user: new mongoose.Types.ObjectId(userId),
       text,
       date: new Date(),
+      likes: [],
+      replies: [],
     };
     recipe.comments.push(comment);
     await recipe.save();
 
     return Recipe.findById(recipeId)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
   }
 
   async deleteComment(
@@ -100,8 +108,10 @@ export class RecipeService {
     await recipe.save();
 
     return Recipe.findById(recipeId)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
   }
 
   async editComment(
@@ -125,15 +135,192 @@ export class RecipeService {
     await recipe.save();
 
     return Recipe.findById(recipeId)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
+  }
+
+  async toggleCommentLike(
+    recipeId: string,
+    commentId: string,
+    userId: string
+  ): Promise<{ recipe: IRecipe; liked: boolean; targetUserId: string; targetText: string } | null> {
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return null;
+    }
+    const comment = recipe.comments.id(commentId);
+    if (!comment) {
+      return null;
+    }
+    const likes = comment.likes ?? [];
+    const existing = likes.findIndex((id) => id.toString() === userId);
+    const liked = existing === -1;
+    if (existing > -1) {
+      likes.splice(existing, 1);
+    } else {
+      likes.push(new mongoose.Types.ObjectId(userId));
+    }
+    comment.likes = likes;
+    const targetUserId = comment.user.toString();
+    const targetText = comment.text;
+    await recipe.save();
+
+    const populated = await Recipe.findById(recipeId)
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
+    if (!populated) return null;
+    return { recipe: populated, liked, targetUserId, targetText };
+  }
+
+  async addCommentReply(
+    recipeId: string,
+    commentId: string,
+    userId: string,
+    text: string,
+    replyToUserId?: string,
+    replyToReplyId?: string
+  ): Promise<{
+    recipe: IRecipe;
+    targetUserId: string;
+    replyText: string;
+    replyId: string;
+    parentText: string;
+    direct: boolean;
+  } | null> {
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return null;
+    }
+    const comment = recipe.comments.id(commentId);
+    if (!comment) {
+      return null;
+    }
+    if (!comment.replies) {
+      comment.replies = [];
+    }
+    const commentAuthorId = comment.user.toString();
+    const participantIds = new Set<string>([
+      commentAuthorId,
+      ...(comment.replies ?? []).map((item) => item.user.toString()),
+    ]);
+    const direct =
+      Boolean(replyToUserId) &&
+      replyToUserId !== commentAuthorId &&
+      participantIds.has(replyToUserId as string);
+    const targetUserId = direct ? (replyToUserId as string) : commentAuthorId;
+    const answeredReply = replyToReplyId
+      ? (comment.replies ?? []).find((item) => item._id?.toString() === replyToReplyId)
+      : direct
+        ? [...(comment.replies ?? [])]
+            .reverse()
+            .find((item) => item.user.toString() === replyToUserId)
+        : undefined;
+    const parentText = answeredReply?.text || comment.text;
+    comment.replies!.push({
+      user: new mongoose.Types.ObjectId(userId),
+      text,
+      date: new Date(),
+      likes: [],
+      ...(direct ? { replyTo: new mongoose.Types.ObjectId(replyToUserId) } : {}),
+    });
+    const createdReply = comment.replies![comment.replies!.length - 1];
+    await recipe.save();
+
+    const populated = await Recipe.findById(recipeId)
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
+    if (!populated) return null;
+    return {
+      recipe: populated,
+      targetUserId,
+      replyText: text,
+      replyId: String(createdReply._id),
+      parentText,
+      direct,
+    };
+  }
+
+  async toggleReplyLike(
+    recipeId: string,
+    commentId: string,
+    replyId: string,
+    userId: string
+  ): Promise<{ recipe: IRecipe; liked: boolean; targetUserId: string; targetText: string } | null> {
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return null;
+    }
+    const comment = recipe.comments.id(commentId);
+    const reply = comment?.replies?.find((item) => item._id?.toString() === replyId);
+    if (!comment || !reply) {
+      return null;
+    }
+    const likes = reply.likes ?? [];
+    const existing = likes.findIndex((id) => id.toString() === userId);
+    const liked = existing === -1;
+    if (existing > -1) {
+      likes.splice(existing, 1);
+    } else {
+      likes.push(new mongoose.Types.ObjectId(userId));
+    }
+    reply.likes = likes;
+    const targetUserId = reply.user.toString();
+    const targetText = reply.text;
+    await recipe.save();
+
+    const populated = await Recipe.findById(recipeId)
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
+    if (!populated) return null;
+    return { recipe: populated, liked, targetUserId, targetText };
+  }
+
+  async deleteCommentReply(
+    recipeId: string,
+    commentId: string,
+    replyId: string,
+    userId: string
+  ): Promise<IRecipe | null> {
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return null;
+    }
+    const comment = recipe.comments.id(commentId);
+    if (!comment || !comment.replies) {
+      return null;
+    }
+    const replyIndex = comment.replies.findIndex(
+      (reply) =>
+        reply._id &&
+        reply._id.toString() === replyId &&
+        reply.user.toString() === userId
+    );
+    if (replyIndex === -1) {
+      throw new Error("Cevap bulunamadı veya silme yetkiniz yok");
+    }
+    comment.replies.splice(replyIndex, 1);
+    await recipe.save();
+
+    return Recipe.findById(recipeId)
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
   }
 
   async rateRecipe(
     recipeId: string,
     userId: string,
     rating: number
-  ): Promise<IRecipe | null> {
+  ): Promise<{ recipe: IRecipe; authorId: string; rating: number } | null> {
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
       return null;
@@ -150,21 +337,27 @@ export class RecipeService {
       });
     }
     recipe.averageRating = recipe.calculateAverageRating();
+    const authorId = recipe.author.toString();
     await recipe.save();
 
-    return Recipe.findById(recipeId)
-      .populate("author", "username")
-      .populate("comments.user", "username");
+    const populated = await Recipe.findById(recipeId)
+      .populate("author", "username name avatar")
+      .populate("comments.user", "username name avatar")
+      .populate("comments.replies.user", "username name avatar")
+      .populate("comments.replies.replyTo", "username name avatar");
+    if (!populated) return null;
+    return { recipe: populated, authorId, rating };
   }
 
   async toggleFavorite(
     recipeId: string,
     userId: string
-  ): Promise<{ isFavorite: boolean }> {
+  ): Promise<{ isFavorite: boolean; authorId: string }> {
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
       throw new Error("Tarif bulunamadı");
     }
+    const authorId = recipe.author.toString();
     const favoriteIndex = recipe.favorites.indexOf(
       new mongoose.Types.ObjectId(userId)
     );
@@ -174,21 +367,22 @@ export class RecipeService {
       recipe.favorites.push(new mongoose.Types.ObjectId(userId));
     }
     await recipe.save();
-    return { isFavorite: favoriteIndex === -1 };
+    return { isFavorite: favoriteIndex === -1, authorId };
   }
 
   async getFavorites(userId: string): Promise<IRecipe[]> {
     const favorites = await Recipe.find({
       favorites: new mongoose.Types.ObjectId(userId),
     })
-      .populate<{ author: IAuthor }>("author", "username")
+      .populate<{ author: IAuthor }>("author", "username name avatar")
       .lean();
 
     return favorites.map((recipe) => ({
       ...recipe,
       author: {
         _id: recipe.author._id.toString(),
-        username: (recipe.author as IAuthor).username || "Bilinmeyen Kullanıcı",
+        username: (recipe.author as IAuthor).username || "",
+        name: (recipe.author as IAuthor).name || "",
       },
     })) as IRecipe[];
   }

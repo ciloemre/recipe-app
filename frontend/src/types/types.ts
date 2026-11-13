@@ -4,7 +4,7 @@ export interface Recipe {
   description: string;
   ingredients: string[];
   instructions: string[];
-  author: string | { _id: string; username: string };
+  author: string | { _id: string; username: string; name?: string; avatar?: string };
   image: string;
   category: string;
   prepTime: number;
@@ -24,14 +24,28 @@ export interface User {
   name: string;
   email: string;
   username: string;
+  avatar?: string;
+  followerCount?: number;
+  followingCount?: number;
+}
+
+export interface CommentReply {
+  _id: string;
+  user: string | { _id: string; username: string; name?: string; avatar?: string };
+  text: string;
+  date: string;
+  likes?: string[];
+  replyTo?: string | { _id: string; username: string; name?: string; avatar?: string };
 }
 
 export interface Comment {
   _id: string;
-  user: string | { _id: string; username: string };
+  user: string | { _id: string; username: string; name?: string; avatar?: string };
   text: string;
   date: string;
   rating?: number;
+  likes?: string[];
+  replies?: CommentReply[];
 }
 
 export interface RecipeFormData {
@@ -51,6 +65,7 @@ export interface ExtendedRecipe extends Recipe {
   author: {
     _id: string;
     username: string;
+    name?: string;
     avatar?: string;
   };
 }

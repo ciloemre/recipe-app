@@ -1,6 +1,8 @@
 import React from "react";
 import { AppShell } from "@mantine/core";
 import Header from "../header/Header";
+import { SocialMediaFollow } from "../recipe/home/socialMedia/SocialMediaFollow";
+import classes from "./layout.module.css";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,12 +10,15 @@ interface LayoutProps {
 
 function Layout({ children }: LayoutProps) {
   return (
-    <AppShell header={{ height: 60 }}>
+    <AppShell header={{ height: 60 }} padding={0}>
       <AppShell.Header>
         <Header />
       </AppShell.Header>
 
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main className={classes.main}>
+        <div className={classes.page}>{children}</div>
+        <SocialMediaFollow />
+      </AppShell.Main>
     </AppShell>
   );
 }

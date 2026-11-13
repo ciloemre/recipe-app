@@ -9,6 +9,7 @@ import { Recipe } from "../types/types";
 import { getAllRecipes, getFavorites, toggleFavorite } from "../api/api";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "../hooks/useSocket";
+import { patchRecipeWithUser, UserUpdate } from "../utils/patchUser";
 
 interface RecipeContextType {
   recipes: Recipe[];
@@ -35,75 +36,99 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuth();
   const { on, off, isConnected } = useSocket();
 
-  const fetchData = useCallback(async () => {
+  const fetchRecipes = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const [recipesData, favoritesData] = await Promise.all([
-        getAllRecipes(),
-        getFavorites(),
-      ]);
-      console.log("Fetched recipes:", recipesData);
+      const recipesData = await getAllRecipes();
       setRecipes(recipesData);
-      setFavorites(favoritesData.map((fav: Recipe) => fav._id));
-    } catch (error) {
-      console.error("Data fetching error:", error);
+    } catch (err) {
+      console.error("Recipe fetch error:", err);
       setError("An error occurred while loading the data");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (user && isConnected) {
-      fetchData();
-
-      const handleNewRecipe = (newRecipe: Recipe) => {
-        setRecipes((prevRecipes) => [newRecipe, ...prevRecipes]);
-      };
-
-      const handleUpdatedRecipe = (updatedRecipe: Recipe) => {
-        setRecipes((prevRecipes) =>
-          prevRecipes.map((recipe) =>
-            recipe._id === updatedRecipe._id ? updatedRecipe : recipe
-          )
-        );
-      };
-
-      const handleDeletedRecipe = (deletedRecipeId: string) => {
-        setRecipes((prevRecipes) =>
-          prevRecipes.filter((recipe) => recipe._id !== deletedRecipeId)
-        );
-      };
-
-      const handleFavoriteToggled = ({
-        recipeId,
-        isFavorite,
-      }: {
-        recipeId: string;
-        isFavorite: boolean;
-      }) => {
-        setFavorites((prev) =>
-          isFavorite
-            ? [...prev, recipeId]
-            : prev.filter((id) => id !== recipeId)
-        );
-      };
-
-      on("recipeAdded", handleNewRecipe);
-      on("recipeUpdated", handleUpdatedRecipe);
-      on("recipeDeleted", handleDeletedRecipe);
-      on("favoriteToggled", handleFavoriteToggled);
-
-      return () => {
-        off("recipeAdded", handleNewRecipe);
-        off("recipeUpdated", handleUpdatedRecipe);
-        off("recipeDeleted", handleDeletedRecipe);
-        off("favoriteToggled", handleFavoriteToggled);
-      };
+  const fetchFavorites = useCallback(async () => {
+    if (!user) {
+      setFavorites([]);
+      return;
     }
-  }, [user, on, off, fetchData, isConnected]);
+    try {
+      const favoritesData = await getFavorites();
+      setFavorites(favoritesData.map((fav: Recipe) => fav._id));
+    } catch (err) {
+      console.error("Favorites fetch error:", err);
+      setFavorites([]);
+    }
+  }, [user]);
+
+  // Public read: load recipes for everyone (guests + authenticated)
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const handleNewRecipe = (newRecipe: Recipe) => {
+      setRecipes((prevRecipes) => [newRecipe, ...prevRecipes]);
+    };
+
+    const handleUpdatedRecipe = (updatedRecipe: Recipe) => {
+      setRecipes((prevRecipes) =>
+        prevRecipes.map((recipe) =>
+          recipe._id === updatedRecipe._id ? updatedRecipe : recipe
+        )
+      );
+    };
+
+    const handleDeletedRecipe = (deletedRecipeId: string) => {
+      setRecipes((prevRecipes) =>
+        prevRecipes.filter((recipe) => recipe._id !== deletedRecipeId)
+      );
+    };
+
+    const handleFavoriteToggled = ({
+      recipeId,
+      isFavorite,
+    }: {
+      recipeId: string;
+      isFavorite: boolean;
+    }) => {
+      if (!user) return;
+      setFavorites((prev) =>
+        isFavorite
+          ? [...prev, recipeId]
+          : prev.filter((id) => id !== recipeId)
+      );
+    };
+
+    const handleUserUpdated = (update: UserUpdate) => {
+      setRecipes((prevRecipes) =>
+        prevRecipes.map((recipe) => patchRecipeWithUser(recipe, update))
+      );
+    };
+
+    on("recipeAdded", handleNewRecipe);
+    on("recipeUpdated", handleUpdatedRecipe);
+    on("recipeDeleted", handleDeletedRecipe);
+    on("favoriteToggled", handleFavoriteToggled);
+    on("userUpdated", handleUserUpdated);
+
+    return () => {
+      off("recipeAdded", handleNewRecipe);
+      off("recipeUpdated", handleUpdatedRecipe);
+      off("recipeDeleted", handleDeletedRecipe);
+      off("favoriteToggled", handleFavoriteToggled);
+      off("userUpdated", handleUserUpdated);
+    };
+  }, [user, on, off, isConnected]);
 
   const toggleFavoriteRecipe = async (recipeId: string): Promise<boolean> => {
     if (!user) return false;
@@ -114,10 +139,10 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
         isFavorite ? [...prev, recipeId] : prev.filter((id) => id !== recipeId)
       );
       return isFavorite;
-    } catch (error) {
-      console.error("Error toggling favorite status:", error);
+    } catch (err) {
+      console.error("Error toggling favorite status:", err);
       setError("An error occurred while updating favorite status");
-      throw error;
+      throw err;
     }
   };
 
