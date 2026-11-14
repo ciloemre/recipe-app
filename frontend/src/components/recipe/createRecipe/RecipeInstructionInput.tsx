@@ -1,8 +1,7 @@
 import { Group } from "@mantine/core";
-import { IconHeading, IconTrash } from "@tabler/icons-react";
 import { CustomTextarea } from "../../atoms/CustomTextarea";
 import { CustomInput } from "../../atoms/CustomInput";
-import { CustomButton } from "../../atoms/CustomButton";
+import { ListRowActions } from "./ListRowActions";
 
 interface RecipeInstructionInputProps {
   value: string;
@@ -30,10 +29,10 @@ export default function RecipeInstructionInput({
   isHeading = false,
 }: RecipeInstructionInputProps) {
   return (
-    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="flex-start">
+    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="flex-start" gap="xs">
       {isHeading ? (
         <CustomInput
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 0 }}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Başlık (ör. Sosun hazırlanışı)"
@@ -41,23 +40,13 @@ export default function RecipeInstructionInput({
         />
       ) : (
         <CustomTextarea
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 0 }}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
         />
       )}
-      <CustomButton
-        variant="light"
-        icon={<IconHeading size={16} />}
-        onClick={onInsertHeading}
-        title="Bu satırın altına başlık ekle"
-      >
-        Başlık
-      </CustomButton>
-      <CustomButton onClick={onRemove} color="red" title="Sil">
-        <IconTrash size={16} />
-      </CustomButton>
+      <ListRowActions onInsertHeading={onInsertHeading} onRemove={onRemove} />
     </Group>
   );
 }

@@ -51,33 +51,31 @@ const RegisterPage: React.FC = () => {
   return (
     <Box
       style={{
-        position: "absolute",
-        inset: 0,
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
+        minHeight: "100dvh",
+        width: "100%",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundImage:
           "url(https://images.unsplash.com/photo-1495195134817-aeb325a55b65?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80)",
       }}
     >
-      <Container size={1100} style={{ height: "100%" }}>
+      <Container size={1100} p={0} style={{ minHeight: "100dvh" }}>
         <Paper
           radius={0}
-          p="30px"
+          p={{ base: "lg", sm: 30 }}
           style={{
             borderRight: `1px solid ${theme.colors.gray[3]}`,
-            height: "100%",
+            minHeight: "100dvh",
+            width: "100%",
             maxWidth: "450px",
-            overflowY: "auto",
+            boxSizing: "border-box",
           }}
         >
           <Center>
             <IconChefHat
               style={{
-                width: "96px",
-                height: "96px",
+                width: "clamp(72px, 22vw, 96px)",
+                height: "clamp(72px, 22vw, 96px)",
                 marginBottom: theme.spacing.xs,
                 color: theme.black,
               }}
@@ -90,9 +88,13 @@ const RegisterPage: React.FC = () => {
             ta="center"
             mt="xs"
             mb="md"
+            fz={{ base: 22, sm: 28 }}
+            lh={1.25}
+            px="xs"
             style={{
               color: theme.black,
               fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+              textWrap: "balance",
             }}
           >
             Lezzetli Tarifler Dünyasına Katılın!

@@ -1,11 +1,13 @@
 .container {
-  height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
   overflow: hidden;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 32px 20px;
+  box-sizing: border-box;
 }
 
 .backgroundImage {
@@ -33,27 +35,40 @@
 .content {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 920px;
   text-align: center;
   color: white;
 }
 
-.welcomeText {
-  margin-bottom: 10px;
+.content .welcomeText {
+  margin: 0 0 0.35em;
+  font-size: clamp(1.75rem, 8vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 700;
   animation: fadeInUp 1s ease-out;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.userName {
-  margin-bottom: 10px;
+.content .userName {
+  margin: 0 0 0.3em;
+  font-size: clamp(2.4rem, 11vw, 5.5rem);
+  line-height: 1.05;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   background: linear-gradient(95deg, #ff7b00, #ff8b2b, #000000);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: fadeInUp 1s ease-out 0.5s both;
-  text-shadow: 2px 2px 4px rgba(255, 123, 0, 0.3);
 }
 
-.subText {
+.content .subText {
+  margin: 0 auto;
+  max-width: 18em;
+  font-size: clamp(1rem, 4.2vw, 1.85rem);
+  line-height: 1.35;
   animation: fadeInUp 1s ease-out 1s both;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -66,19 +81,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  .welcomeText {
-    font-size: 40px;
-    margin-bottom: 30px;
-  }
-  .userName {
-    font-size: 80px;
-    margin-bottom: 40px;
-  }
-  .subText {
-    font-size: 24px;
   }
 }

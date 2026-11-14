@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Box, Text, Container } from "@mantine/core";
+import { Box, Text } from "@mantine/core";
 import styles from "./SplashScreen.module.css";
 import {
   REDIRECT_AFTER_LOGIN_KEY,
@@ -29,17 +29,13 @@ export function SplashScreen() {
   return (
     <Box className={styles.container}>
       <div className={styles.backgroundImage} />
-      <Container className={styles.content}>
-        <Text size="50px" mb={"60px"} className={styles.welcomeText}>
-          Hoş Geldiniz
-        </Text>
-        <Text size="100px" mb={"50px"} className={styles.userName}>
-          {userName}
-        </Text>
-        <Text size="30px" className={styles.subText}>
+      <div className={styles.content}>
+        <Text className={styles.welcomeText}>Hoş Geldiniz</Text>
+        <Text className={styles.userName}>{userName}</Text>
+        <Text className={styles.subText}>
           Lezzetli tarifler sizi bekliyor!
         </Text>
-      </Container>
+      </div>
     </Box>
   );
 }

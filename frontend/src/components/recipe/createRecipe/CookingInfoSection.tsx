@@ -1,4 +1,4 @@
-import { Group } from "@mantine/core";
+import { SimpleGrid } from "@mantine/core";
 import { CustomInput } from "../../atoms/CustomInput";
 import { RecipeFormData } from "../../../types/types";
 
@@ -14,7 +14,7 @@ export function CookingInfoSection({
   onServingsChange,
 }: CookingInfoSectionProps) {
   return (
-    <Group grow mb="md">
+    <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" mb="md">
       <CustomInput
         type="number"
         label="Hazırlık Süresi (dakika)"
@@ -43,6 +43,6 @@ export function CookingInfoSection({
         value={String(formData.servings ?? "")}
         onChange={(e) => onServingsChange(e.target.value)}
       />
-    </Group>
+    </SimpleGrid>
   );
 }

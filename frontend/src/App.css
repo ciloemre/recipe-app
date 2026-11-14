@@ -34,3 +34,13 @@
   color: var(--text-color);
   opacity: 0.8;
 }
+
+@media (max-width: 48em), (pointer: coarse) {
+  input.mantine-Input-input,
+  textarea.mantine-Input-input,
+  select.mantine-Input-input,
+  input.mantine-PasswordInput-innerInput,
+  .mantine-Input-input.mantine-PasswordInput-input {
+    font-size: 16px;
+  }
+}
