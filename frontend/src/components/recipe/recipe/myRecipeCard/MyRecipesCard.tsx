@@ -169,11 +169,15 @@ export function MyRecipesCard({
         <div className={styles.cardStats}>
           <Group gap={5}>
             <IconStar size={18} />
-            <Text size="sm">{recipe.ratings?.length || 0}</Text>
+            <Text size="sm">
+              {recipe.ratings?.length || recipe.ratingCount || 0}
+            </Text>
           </Group>
           <Group gap={5}>
             <IconMessageCircle size={18} />
-            <Text size="sm">{recipe.comments.length}</Text>
+            <Text size="sm">
+              {recipe.comments?.length || recipe.commentCount || 0}
+            </Text>
           </Group>
         </div>
         <div className={styles.cardFooter}>

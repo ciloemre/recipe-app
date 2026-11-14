@@ -1,30 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { toggleFavorite, checkIsFavorite } from "../../api/api";
+import { useCallback } from "react";
+import { toggleFavorite } from "../../api/api";
 import { Recipe } from "../../types/types";
-import { useAuth } from "../../contexts/AuthContext";
 import { useRequireAuth } from "../useRequireAuth";
+import { useRecipe } from "../../contexts/RecipeContext";
 
 export const useFavoriteActions = (recipe: Recipe | null) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const { user } = useAuth();
+  const { favorites, updateFavoriteStatus } = useRecipe();
   const { requireAuth } = useRequireAuth();
-
-  useEffect(() => {
-    const fetchFavoriteStatus = async () => {
-      if (!recipe || !user) {
-        setIsFavorite(false);
-        return;
-      }
-      try {
-        const favoriteStatus = await checkIsFavorite(recipe._id);
-        setIsFavorite(favoriteStatus);
-      } catch (error) {
-        console.error("Favori durumu kontrol edilirken hata oluştu:", error);
-      }
-    };
-
-    fetchFavoriteStatus();
-  }, [recipe, user]);
+  const isFavorite = Boolean(recipe && favorites.includes(recipe._id));
 
   const handleToggleFavorite = useCallback(async (): Promise<boolean> => {
     if (!recipe) return false;
@@ -36,13 +19,13 @@ export const useFavoriteActions = (recipe: Recipe | null) => {
       const { isFavorite: newFavoriteStatus } = await toggleFavorite(
         recipe._id
       );
-      setIsFavorite(newFavoriteStatus);
+      updateFavoriteStatus(recipe._id, newFavoriteStatus);
       return true;
     } catch (error) {
       console.error("Favori durumu değiştirilirken hata oluştu:", error);
       return false;
     }
-  }, [recipe, requireAuth]);
+  }, [recipe, requireAuth, updateFavoriteStatus]);
 
   return { isFavorite, toggleFavorite: handleToggleFavorite };
 };

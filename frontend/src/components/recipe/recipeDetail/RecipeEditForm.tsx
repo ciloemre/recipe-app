@@ -11,6 +11,11 @@ import { openCancelConfirmModal } from "../../../utils/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { validateRecipeForm } from "../../../utils/validateRecipeForm";
+import {
+  AddListItemOptions,
+  applyListAction,
+  RecipeListField,
+} from "../../../utils/sectionHeading";
 
 interface RecipeEditFormProps {
   recipe: Recipe;
@@ -31,7 +36,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
     instructions: recipe.instructions,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
-    servings: recipe.servings,
+    servings: recipe.servings == null ? "" : String(recipe.servings),
     category: recipe.category,
   });
 
@@ -42,7 +47,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
   const handleArrayChange = (
     index: number,
     value: string,
-    field: "ingredients" | "instructions"
+    field: RecipeListField
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -52,15 +57,13 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
 
   const handleArrayAction = (
     action: "add" | "remove",
-    field: "ingredients" | "instructions",
-    index?: number
+    field: RecipeListField,
+    index?: number,
+    heading?: boolean
   ) => {
     setFormData((prev) => ({
       ...prev,
-      [field]:
-        action === "add"
-          ? [...prev[field], ""]
-          : prev[field].filter((_, i) => i !== index),
+      [field]: applyListAction(prev[field], action, index, heading),
     }));
   };
 
@@ -124,7 +127,17 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
           <IngredientsSection
             ingredients={formData.ingredients}
             onArrayInputChange={handleArrayChange}
-            onAddArrayItem={() => handleArrayAction("add", "ingredients")}
+            onAddArrayItem={(
+              _field: RecipeListField,
+              options?: AddListItemOptions
+            ) =>
+              handleArrayAction(
+                "add",
+                "ingredients",
+                options?.index,
+                options?.heading
+              )
+            }
             onRemoveArrayItem={(index) =>
               handleArrayAction("remove", "ingredients", index)
             }
@@ -132,7 +145,17 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
           <InstructionsSection
             instructions={formData.instructions}
             onArrayInputChange={handleArrayChange}
-            onAddArrayItem={() => handleArrayAction("add", "instructions")}
+            onAddArrayItem={(
+              _field: RecipeListField,
+              options?: AddListItemOptions
+            ) =>
+              handleArrayAction(
+                "add",
+                "instructions",
+                options?.index,
+                options?.heading
+              )
+            }
             onRemoveArrayItem={(index) =>
               handleArrayAction("remove", "instructions", index)
             }
@@ -141,6 +164,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
             formData={formData}
             onNumberInputChange={(name) => (value: number) =>
               handleChange(name, value)}
+            onServingsChange={(value) => handleChange("servings", value)}
           />
           <CustomButton type="submit" fullWidth mt="xl">
             Değişiklikleri Kaydet

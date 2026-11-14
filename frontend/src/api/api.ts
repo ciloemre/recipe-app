@@ -210,9 +210,13 @@ export const deleteRecipe = async (id: string): Promise<void> => {
   }
 };
 
-export const getFavorites = async (): Promise<Recipe[]> => {
+export const getFavorites = async (): Promise<
+  Array<string | { _id?: string }>
+> => {
   try {
-    const response = await api.get<Recipe[]>("/users/favorites");
+    const response = await api.get<Array<string | { _id?: string }>>(
+      "/users/favorites"
+    );
     return response.data;
   } catch (error) {
     return handleError(error, "Favoriler yüklenirken bir hata oluştu");

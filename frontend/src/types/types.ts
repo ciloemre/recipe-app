@@ -9,11 +9,12 @@ export interface Recipe {
   category: string;
   prepTime: number;
   cookTime: number;
-  servings: number;
+  servings: string;
   ratings: { user: string; value: number }[];
   averageRating: number;
   comments: Comment[];
   ratingCount?: number;
+  commentCount?: number;
   createdAt: string;
   updatedAt: string;
   addedToFavoritesAt: string;
@@ -56,7 +57,7 @@ export interface RecipeFormData {
   instructions: string[];
   prepTime: number;
   cookTime: number;
-  servings: number;
+  servings: string;
   category: string;
 }
 

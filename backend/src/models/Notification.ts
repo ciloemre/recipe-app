@@ -8,6 +8,7 @@ export const NOTIFICATION_TYPES = [
   "RECIPE_RATING",
   "RECIPE_FAVORITE",
   "USER_FOLLOW",
+  "RECIPE_SHARED",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

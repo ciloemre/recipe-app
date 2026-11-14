@@ -6,6 +6,10 @@ import { IngredientsSection } from "./IngredientsSection";
 import { InstructionsSection } from "./InstructionsSection";
 import { CookingInfoSection } from "./CookingInfoSection";
 import { CustomButton } from "../../atoms/CustomButton";
+import {
+  AddListItemOptions,
+  RecipeListField,
+} from "../../../utils/sectionHeading";
 
 interface RecipeFormProps {
   formData: RecipeFormData;
@@ -13,16 +17,14 @@ interface RecipeFormProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   onNumberInputChange: (name: keyof RecipeFormData) => (value: number) => void;
+  onServingsChange: (value: string) => void;
   onArrayInputChange: (
     index: number,
     value: string,
-    field: "ingredients" | "instructions"
+    field: RecipeListField
   ) => void;
-  onAddArrayItem: (field: "ingredients" | "instructions") => void;
-  onRemoveArrayItem: (
-    index: number,
-    field: "ingredients" | "instructions"
-  ) => void;
+  onAddArrayItem: (field: RecipeListField, options?: AddListItemOptions) => void;
+  onRemoveArrayItem: (index: number, field: RecipeListField) => void;
   onSubmit: (e: React.FormEvent) => void;
   onImageUpload: (file: File | null) => void;
   onCategoryChange: (value: string) => void;
@@ -33,6 +35,7 @@ export function RecipeForm({
   formData,
   onInputChange,
   onNumberInputChange,
+  onServingsChange,
   onArrayInputChange,
   onAddArrayItem,
   onRemoveArrayItem,
@@ -65,6 +68,7 @@ export function RecipeForm({
         <CookingInfoSection
           formData={formData}
           onNumberInputChange={onNumberInputChange}
+          onServingsChange={onServingsChange}
         />
         <CustomButton
           mb={"20px"}

@@ -8,60 +8,36 @@ import {
   Badge,
   Button,
   Avatar,
+  Loader,
+  Center,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { IconClock, IconChefHat, IconCooker } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { getLatestRecipes } from "../../../../utils/recipeUtils";
+import { useMemo } from "react";
 import { ExtendedRecipe } from "../../../../types/types";
 import styles from "./LatestRecipes.module.css";
 import { displayPersonName } from "../../../../utils/displayName";
-import { useSocket } from "../../../../hooks/useSocket";
-import { patchRecipeWithUser, UserUpdate } from "../../../../utils/patchUser";
+import { useRecipe } from "../../../../contexts/RecipeContext";
 
 export function LatestRecipes() {
-  const [latestRecipes, setLatestRecipes] = useState<ExtendedRecipe[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const { on, off, isConnected } = useSocket();
+  const { recipes, loading, error: recipeError } = useRecipe();
 
-  useEffect(() => {
-    const fetchLatestRecipes = async () => {
-      try {
-        const recipes = await getLatestRecipes(3);
-        const extendedRecipes: ExtendedRecipe[] = recipes.map((recipe) => ({
-          ...recipe,
-          author:
-            typeof recipe.author === "string"
-              ? { _id: "", username: recipe.author }
-              : recipe.author,
-          difficulty: "Normal",
-        }));
-        setLatestRecipes(extendedRecipes);
-      } catch (error) {
-        console.error("Son tarifleri çekerken hata oluştu:", error);
-        setError(
-          "Tarifler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
-        );
-      }
-    };
-    fetchLatestRecipes();
-  }, []);
+  const latestRecipes = useMemo<ExtendedRecipe[]>(
+    () =>
+      recipes.slice(0, 3).map((recipe) => ({
+        ...recipe,
+        author:
+          typeof recipe.author === "string"
+            ? { _id: "", username: recipe.author }
+            : recipe.author,
+        difficulty: "Normal",
+      })),
+    [recipes]
+  );
 
-  useEffect(() => {
-    if (!isConnected) return;
-    const handleUserUpdated = (update: UserUpdate) => {
-      setLatestRecipes((prev) =>
-        prev.map((recipe) => {
-          const patched = patchRecipeWithUser(recipe, update);
-          const author =
-            typeof patched.author === "object" ? patched.author : recipe.author;
-          return { ...patched, author, difficulty: recipe.difficulty };
-        })
-      );
-    };
-    on("userUpdated", handleUserUpdated);
-    return () => off("userUpdated", handleUserUpdated);
-  }, [isConnected, on, off]);
+  const error = recipeError
+    ? "Tarifler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+    : null;
 
   return (
     <Container className={styles.container} size={"xl"}>
@@ -69,6 +45,10 @@ export function LatestRecipes() {
 
       {error ? (
         <Text className={styles.errorText}>{error}</Text>
+      ) : loading && latestRecipes.length === 0 ? (
+        <Center py="xl">
+          <Loader color="orange" />
+        </Center>
       ) : latestRecipes.length === 0 ? (
         <Text className={styles.noRecipesText}>Henüz tarif eklenmemiş.</Text>
       ) : (
@@ -86,6 +66,7 @@ export function LatestRecipes() {
                   src={recipe.image}
                   alt={recipe.title}
                   className={styles.recipeImage}
+                  loading="lazy"
                 />
                 <Badge color="orange" className={styles.newBadge}>
                   Yeni
@@ -115,6 +96,7 @@ export function LatestRecipes() {
                 color="dimmed"
                 className={styles.recipeDescription}
                 mb="md"
+                lineClamp={3}
               >
                 {recipe.description}
               </Text>

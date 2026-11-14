@@ -5,7 +5,7 @@ import { IconClock, IconCooker, IconUsers } from "@tabler/icons-react";
 interface RecipeMetaInfoProps {
   prepTime: number;
   cookTime: number;
-  servings: number;
+  servings: string;
 }
 
 export const RecipeMetaInfo: React.FC<RecipeMetaInfoProps> = ({
@@ -24,7 +24,7 @@ export const RecipeMetaInfo: React.FC<RecipeMetaInfoProps> = ({
     </Group>
     <Group>
       <IconUsers size={20} />
-      <Text>Porsiyon Sayısı: {servings}</Text>
+      <Text>Porsiyon: {servings}</Text>
     </Group>
   </Stack>
 );

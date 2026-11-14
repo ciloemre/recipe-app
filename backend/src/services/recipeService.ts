@@ -1,9 +1,10 @@
 import Recipe, { IRecipe, IAuthor, IComment } from "../models/Recipe";
 import mongoose from "mongoose";
+import { findRecipesForList } from "../utils/recipeListQuery";
 
 export class RecipeService {
   async getAllRecipes(): Promise<IRecipe[]> {
-    return Recipe.find().populate("author", "username name avatar").sort({ createdAt: -1 });
+    return findRecipesForList();
   }
 
   async createRecipe(
@@ -371,19 +372,8 @@ export class RecipeService {
   }
 
   async getFavorites(userId: string): Promise<IRecipe[]> {
-    const favorites = await Recipe.find({
+    return findRecipesForList({
       favorites: new mongoose.Types.ObjectId(userId),
-    })
-      .populate<{ author: IAuthor }>("author", "username name avatar")
-      .lean();
-
-    return favorites.map((recipe) => ({
-      ...recipe,
-      author: {
-        _id: recipe.author._id.toString(),
-        username: (recipe.author as IAuthor).username || "",
-        name: (recipe.author as IAuthor).name || "",
-      },
-    })) as IRecipe[];
+    });
   }
 }

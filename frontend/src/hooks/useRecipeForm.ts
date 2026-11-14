@@ -1,6 +1,7 @@
 // src/hooks/form/useRecipeForm.ts
 import { useState } from "react";
 import { RecipeFormData } from "../types/types";
+import { applyListAction, RecipeListField } from "../utils/sectionHeading";
 
 const initialFormData: RecipeFormData = {
   title: "",
@@ -10,7 +11,7 @@ const initialFormData: RecipeFormData = {
   instructions: [""],
   prepTime: 0,
   cookTime: 0,
-  servings: 1,
+  servings: "",
   category: "",
 };
 
@@ -24,7 +25,7 @@ export function useRecipeForm() {
   const handleArrayChange = (
     index: number,
     value: string,
-    field: "ingredients" | "instructions"
+    field: RecipeListField
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -34,15 +35,13 @@ export function useRecipeForm() {
 
   const handleArrayAction = (
     action: "add" | "remove",
-    field: "ingredients" | "instructions",
-    index?: number
+    field: RecipeListField,
+    index?: number,
+    heading?: boolean
   ) => {
     setFormData((prev) => ({
       ...prev,
-      [field]:
-        action === "add"
-          ? [...prev[field], ""]
-          : prev[field].filter((_, i) => i !== index),
+      [field]: applyListAction(prev[field], action, index, heading),
     }));
   };
 

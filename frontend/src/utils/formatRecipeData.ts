@@ -10,6 +10,6 @@ export const formatRecipeData = (formData: RecipeFormData, author: string) => {
     author,
     prepTime: Number(formData.prepTime),
     cookTime: Number(formData.cookTime),
-    servings: Number(formData.servings),
+    servings: String(formData.servings).trim(),
   };
 };

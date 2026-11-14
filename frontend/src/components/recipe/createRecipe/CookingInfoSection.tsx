@@ -5,11 +5,13 @@ import { RecipeFormData } from "../../../types/types";
 interface CookingInfoSectionProps {
   formData: RecipeFormData;
   onNumberInputChange: (name: keyof RecipeFormData) => (value: number) => void;
+  onServingsChange: (value: string) => void;
 }
 
 export function CookingInfoSection({
   formData,
   onNumberInputChange,
+  onServingsChange,
 }: CookingInfoSectionProps) {
   return (
     <Group grow mb="md">
@@ -34,14 +36,12 @@ export function CookingInfoSection({
         min={0}
       />
       <CustomInput
-        type="number"
-        label="Porsiyon Sayısı (adet)"
+        type="text"
+        label="Porsiyon"
         name="servings"
-        value={formData.servings.toString()}
-        onChange={(e) =>
-          onNumberInputChange("servings")(Number(e.target.value))
-        }
-        min={1}
+        placeholder="ör. 4-6 kişilik, 1 tepsi"
+        value={String(formData.servings ?? "")}
+        onChange={(e) => onServingsChange(e.target.value)}
       />
     </Group>
   );

@@ -181,9 +181,9 @@ const RecipeDetailPage: React.FC = () => {
           <RecipeActions
             isFavorite={isFavorite}
             toggleFavorite={toggleFavorite}
-            commentCount={recipe.comments.length}
+            commentCount={recipe.commentCount ?? recipe.comments?.length ?? 0}
             scrollToComments={scrollToComments}
-            ratingCount={recipe.ratings.length}
+            ratingCount={recipe.ratingCount ?? recipe.ratings?.length ?? 0}
             averageRating={recipe.averageRating}
             onRating={handleRating}
             recipeId={recipe._id}

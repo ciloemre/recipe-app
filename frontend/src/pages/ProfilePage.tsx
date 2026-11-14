@@ -19,7 +19,6 @@ export function ProfilePage() {
     handleEditRecipe,
     updateRecipe,
     removeRecipe,
-    fetchUserDataAndRecipes,
     setUserData,
   } = useProfileData();
   const { updateCurrentUser } = useAuth();
@@ -52,11 +51,10 @@ export function ProfilePage() {
 
   const handleTabChange = (value: string | null) => {
     setActiveTab(value);
-    fetchUserDataAndRecipes();
   };
 
-  if (loading) return <Loader color="orange" />;
-  if (error) return <Text color="red">{error}</Text>;
+  if (loading && !userData) return <Loader color="orange" />;
+  if (error && !userData) return <Text color="red">{error}</Text>;
   if (!userData) return <Text>Kullanıcı bilgileri bulunamadı.</Text>;
 
   return (

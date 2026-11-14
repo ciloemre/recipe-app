@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Title, Box, Button, ScrollArea } from "@mantine/core";
+import { Title, Text, Box, Button, ScrollArea } from "@mantine/core";
+import {
+  isSectionHeading,
+  sectionHeadingText,
+} from "../../../../utils/sectionHeading";
 
 interface RecipeInstructionsProps {
   instructions: string[];
@@ -11,7 +15,7 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
   maxHeight = 200, // Varsayılan maksimum yükseklik (piksel cinsinden)
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const listRef = useRef<HTMLOListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [showButton, setShowButton] = useState(false);
   const [listHeight, setListHeight] = useState(0);
 
@@ -59,49 +63,66 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
           }}
         >
           <Box
-            component="ol"
             ref={listRef}
             style={{
               margin: 0,
               padding: 0,
-              listStyle: "none",
               display: "flex",
               flexDirection: "column",
               gap: 12,
             }}
           >
-            {instructions.map((step, index) => (
-              <li
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 8,
-                }}
-              >
-                <span
-                  style={{
-                    flex: "0 0 auto",
-                    minWidth: 20,
-                    fontWeight: 700,
-                    lineHeight: 1.55,
-                    color: "var(--mantine-color-orange-6)",
-                  }}
-                >
-                  {index + 1}.
-                </span>
-                <span
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    lineHeight: 1.55,
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {step}
-                </span>
-              </li>
-            ))}
+            {(() => {
+              let stepNumber = 0;
+              return instructions.map((step, index) => {
+                if (isSectionHeading(step)) {
+                  return (
+                    <Text
+                      key={index}
+                      fw={700}
+                      c="orange"
+                      mt={index === 0 ? 0 : "xs"}
+                    >
+                      {sectionHeadingText(step)}
+                    </Text>
+                  );
+                }
+
+                stepNumber += 1;
+                return (
+                  <Box
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                    }}
+                  >
+                    <span
+                      style={{
+                        flex: "0 0 auto",
+                        minWidth: 20,
+                        fontWeight: 700,
+                        lineHeight: 1.55,
+                        color: "var(--mantine-color-orange-6)",
+                      }}
+                    >
+                      {stepNumber}.
+                    </span>
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        lineHeight: 1.55,
+                        overflowWrap: "break-word",
+                      }}
+                    >
+                      {step}
+                    </span>
+                  </Box>
+                );
+              });
+            })()}
           </Box>
         </ScrollArea>
 

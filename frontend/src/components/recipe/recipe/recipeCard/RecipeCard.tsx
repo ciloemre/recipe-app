@@ -113,6 +113,7 @@ export function RecipeCard({
             src={recipe.image}
             alt={recipe.title}
             className={styles.cardImage}
+            loading="lazy"
           />
           <Badge
             className={styles.dateBadge}
@@ -183,11 +184,15 @@ export function RecipeCard({
             </ActionIcon>
             <Group gap={5}>
               <IconStar size={18} />
-              <Text size="sm">{recipe.ratings?.length || 0}</Text>
+              <Text size="sm">
+                {recipe.ratings?.length || recipe.ratingCount || 0}
+              </Text>
             </Group>
             <Group gap={5}>
               <IconMessageCircle size={18} />
-              <Text size="sm">{recipe.comments.length}</Text>
+              <Text size="sm">
+                {recipe.comments?.length || recipe.commentCount || 0}
+              </Text>
             </Group>
           </div>
           <Button

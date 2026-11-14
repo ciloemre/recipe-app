@@ -3,6 +3,7 @@ import Recipe from "../models/Recipe";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { CustomError } from "../utils/customError";
+import { findRecipesForList } from "../utils/recipeListQuery";
 
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\sA-Za-z0-9]).{8,}$/;
@@ -39,12 +40,12 @@ export class UserService {
     }
   }
 
-  async getFavorites(userId: string): Promise<mongoose.Types.ObjectId[]> {
-    const user = await User.findById(userId).populate("favorites");
+  async getFavorites(userId: string): Promise<string[]> {
+    const user = await User.findById(userId).select("favorites").lean();
     if (!user) {
       throw new Error("Kullanıcı bulunamadı");
     }
-    return user.favorites;
+    return (user.favorites || []).map((id) => String(id));
   }
 
   async removeFromFavorites(
@@ -73,7 +74,9 @@ export class UserService {
   }
 
   async getUserRecipes(userId: string) {
-    return Recipe.find({ author: userId });
+    return findRecipesForList({
+      author: new mongoose.Types.ObjectId(userId),
+    });
   }
 
   async updateProfile(

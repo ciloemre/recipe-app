@@ -3,6 +3,10 @@ import { RecipeForm } from "../components/recipe/createRecipe/RecipeForm";
 import { AuthenticatedContent } from "../components/recipe/AuthenticatedContent";
 import { useRecipeFormSubmit } from "../hooks/useRecipeFormSubmit";
 import { RecipeFormData } from "../types/types";
+import {
+  AddListItemOptions,
+  RecipeListField,
+} from "../utils/sectionHeading";
 import PageHeader from "../components/recipe/createRecipe/PageHeader";
 
 export function CreateRecipePage() {
@@ -29,14 +33,17 @@ export function CreateRecipePage() {
           onNumberInputChange={(name: keyof RecipeFormData) =>
             (value: number) =>
               handleChange(name, value)}
+          onServingsChange={(value: string) => handleChange("servings", value)}
           onArrayInputChange={handleArrayChange}
-          onAddArrayItem={(field: "ingredients" | "instructions") =>
-            handleArrayAction("add", field)
+          onAddArrayItem={(
+            field: RecipeListField,
+            options?: AddListItemOptions
+          ) =>
+            handleArrayAction("add", field, options?.index, options?.heading)
           }
-          onRemoveArrayItem={(
-            index: number,
-            field: "ingredients" | "instructions"
-          ) => handleArrayAction("remove", field, index)}
+          onRemoveArrayItem={(index: number, field: RecipeListField) =>
+            handleArrayAction("remove", field, index)
+          }
           onSubmit={handleSubmit}
           onImageUpload={(file: File | null) =>
             handleChange("image", file ? file.name : "")

@@ -5,6 +5,7 @@ interface CustomButtonProps extends Omit<ButtonProps, "onClick"> {
   icon?: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
+  title?: string;
 }
 
 export function CustomButton({

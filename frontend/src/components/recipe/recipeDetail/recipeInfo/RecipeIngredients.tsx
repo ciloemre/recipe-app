@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Title, List, Box, Button, ScrollArea } from "@mantine/core";
+import { Title, Text, Box, Button, ScrollArea, Group } from "@mantine/core";
+import {
+  isSectionHeading,
+  sectionHeadingText,
+} from "../../../../utils/sectionHeading";
 
 interface RecipeIngredientsProps {
   ingredients: string[];
@@ -11,7 +15,7 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
   maxHeight = 200, // Varsayılan maksimum yükseklik (piksel cinsinden)
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [showButton, setShowButton] = useState(false);
   const [listHeight, setListHeight] = useState(0);
 
@@ -58,34 +62,49 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
             transition: "height 0.3s ease-in-out",
           }}
         >
-          <List
-            ref={listRef}
-            spacing="sm"
-            size="md"
-            icon={
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: "var(--mantine-color-orange-filled)",
-                }}
-              />
-            }
-          >
-            {ingredients.map((ingredient, index) => (
-              <List.Item
-                key={index}
-                style={{
-                  overflowWrap: "anywhere",
-                  wordBreak: "break-word",
-                  whiteSpace: "normal",
-                }}
-              >
-                {ingredient}
-              </List.Item>
-            ))}
-          </List>
+          <Box ref={listRef}>
+            {ingredients.map((ingredient, index) =>
+              isSectionHeading(ingredient) ? (
+                <Text
+                  key={index}
+                  fw={700}
+                  c="orange"
+                  mt={index === 0 ? 0 : "md"}
+                  mb={4}
+                >
+                  {sectionHeadingText(ingredient)}
+                </Text>
+              ) : (
+                <Group
+                  key={index}
+                  gap="sm"
+                  wrap="nowrap"
+                  align="flex-start"
+                  mb={6}
+                >
+                  <Box
+                    style={{
+                      width: 8,
+                      height: 8,
+                      marginTop: 8,
+                      borderRadius: "50%",
+                      flex: "0 0 auto",
+                      backgroundColor: "var(--mantine-color-orange-filled)",
+                    }}
+                  />
+                  <Text
+                    style={{
+                      overflowWrap: "anywhere",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {ingredient}
+                  </Text>
+                </Group>
+              )
+            )}
+          </Box>
         </ScrollArea>
 
         {showButton && (

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Text, SimpleGrid, Container, Box } from "@mantine/core";
+import { Text, SimpleGrid, Container, Box, Loader, Center } from "@mantine/core";
 import { RecipeCard } from "../components/recipe/recipe/recipeCard/RecipeCard";
 import { SearchForm } from "../components/recipe/recipe/searchForm/SearchForm";
 import { Recipe } from "../types/types";
@@ -7,8 +7,13 @@ import { useRecipe } from "../contexts/RecipeContext";
 import { PaginatedList } from "../components/recipe/PaginatedList";
 
 export function FavoritesPage() {
-  const { recipes, favorites, toggleFavoriteRecipe, updateFavoriteStatus } =
-    useRecipe();
+  const {
+    recipes,
+    favorites,
+    loading,
+    toggleFavoriteRecipe,
+    updateFavoriteStatus,
+  } = useRecipe();
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -59,10 +64,26 @@ export function FavoritesPage() {
 
   const favoriteRecipes = getFavoriteRecipes();
 
-  if (favoriteRecipes.length === 0) {
+  if (loading && recipes.length === 0) {
+    return (
+      <Center mt={40}>
+        <Loader color="orange" />
+      </Center>
+    );
+  }
+
+  if (favorites.length === 0) {
     return (
       <Container mt={40} size="xl">
         <Text>Henüz favori tarifiniz yok.</Text>
+      </Container>
+    );
+  }
+
+  if (favoriteRecipes.length === 0) {
+    return (
+      <Container mt={40} size="xl">
+        <Text>Favori tarifler şu an listede görünmüyor.</Text>
       </Container>
     );
   }

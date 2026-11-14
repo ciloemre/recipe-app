@@ -4,12 +4,14 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import { Recipe } from "../types/types";
 import { getAllRecipes, getFavorites, toggleFavorite } from "../api/api";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "../hooks/useSocket";
 import { patchRecipeWithUser, UserUpdate } from "../utils/patchUser";
+import { toFavoriteIds } from "../utils/favoriteIds";
 
 interface RecipeContextType {
   recipes: Recipe[];
@@ -20,6 +22,7 @@ interface RecipeContextType {
   updateRecipeInState: (updatedRecipe: Recipe) => void;
   deleteRecipeFromState: (recipeId: string) => void;
   updateFavoriteStatus: (recipeId: string, isFavorite: boolean) => void;
+  refreshRecipes: () => Promise<void>;
   loading: boolean;
   error: string | null;
 }
@@ -35,16 +38,23 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { on, off, isConnected } = useSocket();
+  const recipesRef = useRef(recipes);
+  recipesRef.current = recipes;
 
   const fetchRecipes = useCallback(async () => {
-    setLoading(true);
+    const hasCache = recipesRef.current.length > 0;
+    if (!hasCache) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const recipesData = await getAllRecipes();
       setRecipes(recipesData);
     } catch (err) {
       console.error("Recipe fetch error:", err);
-      setError("An error occurred while loading the data");
+      if (!hasCache) {
+        setError("An error occurred while loading the data");
+      }
     } finally {
       setLoading(false);
     }
@@ -57,14 +67,13 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     try {
       const favoritesData = await getFavorites();
-      setFavorites(favoritesData.map((fav: Recipe) => fav._id));
+      setFavorites(toFavoriteIds(favoritesData as Array<string | { _id?: string }>));
     } catch (err) {
       console.error("Favorites fetch error:", err);
       setFavorites([]);
     }
   }, [user]);
 
-  // Public read: load recipes for everyone (guests + authenticated)
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
@@ -77,13 +86,31 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!isConnected) return;
 
     const handleNewRecipe = (newRecipe: Recipe) => {
-      setRecipes((prevRecipes) => [newRecipe, ...prevRecipes]);
+      setRecipes((prevRecipes) => {
+        if (prevRecipes.some((recipe) => recipe._id === newRecipe._id)) {
+          return prevRecipes;
+        }
+        return [newRecipe, ...prevRecipes];
+      });
     };
 
     const handleUpdatedRecipe = (updatedRecipe: Recipe) => {
       setRecipes((prevRecipes) =>
         prevRecipes.map((recipe) =>
-          recipe._id === updatedRecipe._id ? updatedRecipe : recipe
+          recipe._id === updatedRecipe._id
+            ? {
+                ...recipe,
+                ...updatedRecipe,
+                commentCount:
+                  updatedRecipe.commentCount ??
+                  updatedRecipe.comments?.length ??
+                  recipe.commentCount,
+                ratingCount:
+                  updatedRecipe.ratingCount ??
+                  updatedRecipe.ratings?.length ??
+                  recipe.ratingCount,
+              }
+            : recipe
         )
       );
     };
@@ -92,6 +119,7 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
       setRecipes((prevRecipes) =>
         prevRecipes.filter((recipe) => recipe._id !== deletedRecipeId)
       );
+      setFavorites((prev) => prev.filter((id) => id !== deletedRecipeId));
     };
 
     const handleFavoriteToggled = ({
@@ -104,7 +132,9 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!user) return;
       setFavorites((prev) =>
         isFavorite
-          ? [...prev, recipeId]
+          ? prev.includes(recipeId)
+            ? prev
+            : [...prev, recipeId]
           : prev.filter((id) => id !== recipeId)
       );
     };
@@ -136,7 +166,11 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const { isFavorite } = await toggleFavorite(recipeId);
       setFavorites((prev) =>
-        isFavorite ? [...prev, recipeId] : prev.filter((id) => id !== recipeId)
+        isFavorite
+          ? prev.includes(recipeId)
+            ? prev
+            : [...prev, recipeId]
+          : prev.filter((id) => id !== recipeId)
       );
       return isFavorite;
     } catch (err) {
@@ -149,7 +183,9 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateRecipeInState = useCallback((updatedRecipe: Recipe) => {
     setRecipes((prevRecipes) =>
       prevRecipes.map((recipe) =>
-        recipe._id === updatedRecipe._id ? updatedRecipe : recipe
+        recipe._id === updatedRecipe._id
+          ? { ...recipe, ...updatedRecipe }
+          : recipe
       )
     );
   }, []);
@@ -158,12 +194,17 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
     setRecipes((prevRecipes) =>
       prevRecipes.filter((recipe) => recipe._id !== recipeId)
     );
+    setFavorites((prev) => prev.filter((id) => id !== recipeId));
   }, []);
 
   const updateFavoriteStatus = useCallback(
     (recipeId: string, isFavorite: boolean) => {
       setFavorites((prev) =>
-        isFavorite ? [...prev, recipeId] : prev.filter((id) => id !== recipeId)
+        isFavorite
+          ? prev.includes(recipeId)
+            ? prev
+            : [...prev, recipeId]
+          : prev.filter((id) => id !== recipeId)
       );
     },
     []
@@ -180,6 +221,7 @@ export const RecipeProvider: React.FC<{ children: React.ReactNode }> = ({
         updateRecipeInState,
         deleteRecipeFromState,
         updateFavoriteStatus,
+        refreshRecipes: fetchRecipes,
         loading,
         error,
       }}

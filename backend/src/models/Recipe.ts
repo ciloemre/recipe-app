@@ -38,7 +38,7 @@ export interface IRecipe extends Document {
   category: string;
   prepTime: number;
   cookTime: number;
-  servings: number;
+  servings: string;
   ratings: { user: mongoose.Types.ObjectId; value: number }[];
   averageRating: number;
   calculateAverageRating: () => number;
@@ -76,7 +76,7 @@ const RecipeSchema: Schema = new Schema(
     category: { type: String },
     prepTime: { type: Number },
     cookTime: { type: Number },
-    servings: { type: Number },
+    servings: { type: String },
     comments: [commentSchema],
     ratings: [
       {

@@ -5,6 +5,7 @@ import { RecipeService } from "../services/recipeService";
 import { IUser } from "../models/User";
 import { Server } from "socket.io";
 import { createAndEmitNotification } from "../services/notificationService";
+import User from "../models/User";
 
 function clip(text: string, max: number) {
   const clean = text.replace(/\s+/g, " ").trim();
@@ -53,10 +54,26 @@ export const createRecipe = asyncHandler(
       req.user._id.toString()
     );
 
-    const io = req.app.get("io");
+    const io = req.app.get("io") as Server;
     const populatedRecipe = await recipe.populate("author", "username name avatar");
     console.log("Emitting new recipe:", populatedRecipe);
     io.emit("recipeAdded", populatedRecipe);
+
+    const author = await User.findById(req.user._id).select("followers");
+    const followers = author?.followers ?? [];
+    const title = clip(String(populatedRecipe.title || ""), 60) || "Tarif";
+    await Promise.all(
+      followers.map((followerId) =>
+        createAndEmitNotification({
+          io,
+          recipientId: followerId,
+          senderId: req.user!._id.toString(),
+          type: "RECIPE_SHARED",
+          recipeId: String(populatedRecipe._id),
+          message: `yeni bir tarif paylaştı: “${title}”`,
+        })
+      )
+    );
 
     res.status(201).json(populatedRecipe);
   }

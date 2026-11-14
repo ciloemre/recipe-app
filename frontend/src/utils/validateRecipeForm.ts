@@ -1,15 +1,16 @@
 import { RecipeFormData } from "../types/types";
+import { listItemText } from "./sectionHeading";
 
 export const validateRecipeForm = (formData: RecipeFormData): boolean => {
   const isFormValid =
     formData.title.trim() !== "" &&
     formData.description.trim() !== "" &&
     formData.image.trim() !== "" &&
-    formData.ingredients.every((ing) => ing.trim() !== "") &&
-    formData.instructions.every((ins) => ins.trim() !== "") &&
+    formData.ingredients.every((ing) => listItemText(ing) !== "") &&
+    formData.instructions.every((ins) => listItemText(ins) !== "") &&
     formData.prepTime > 0 &&
     formData.cookTime >= 0 &&
-    formData.servings > 0 &&
+    String(formData.servings).trim() !== "" &&
     formData.category !== "";
 
   if (!isFormValid) {
