@@ -1,7 +1,9 @@
 # Gastronova - Discover World Cuisine From Your Home
 #### Gastronova is an innovative recipe platform where you can share your own recipes, favorite, comment on, and rate other people's recipes.
 
-<img width="1470" alt="Readme" src="https://github.com/user-attachments/assets/963cf38e-16c3-41ef-83ca-3671eb2e3b86">
+🚀 <b>Live Demo:</b> <a href="https://gastronova.vercel.app/" target="_blank" rel="noopener noreferrer">https://gastronova.vercel.app/</a>
+
+<img width="1900" height="977" alt="image" src="https://github.com/user-attachments/assets/528e54bb-2a04-454d-a753-7cff786b5ee4" />
 
 # Table of Contents
 - [Project Overview](#project-overview)
