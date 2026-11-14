@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5003";
+import { SOCKET_URL } from "../config/api";
 
 let sharedSocket: Socket | null = null;
 let activeUserId: string | null = null;

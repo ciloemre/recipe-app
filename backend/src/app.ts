@@ -22,11 +22,33 @@ const limiter = rateLimit({
   max: 1000,
 });
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 app.use(limiter);
 
+const configuredOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean);
+
+function isAllowedOrigin(origin?: string) {
+  if (!origin) return true;
+  if (configuredOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    return url.protocol === "https:" && url.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin(origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) {
+    callback(null, isAllowedOrigin(origin));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -36,7 +58,9 @@ app.use(cors(corsOptions));
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin(origin, callback) {
+      callback(null, isAllowedOrigin(origin));
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },

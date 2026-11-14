@@ -1,8 +1,6 @@
 import axios from "axios";
+import { API_URL } from "../config/api";
 import { Recipe, RecipeFormData, User } from "../types/types";
-
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5003/api";
 export const TOKEN_KEY = "token";
 
 const PROTECTED_PATH_PREFIXES = [
