@@ -58,7 +58,7 @@ export function ProfilePage() {
   if (!userData) return <Text>Kullanıcı bilgileri bulunamadı.</Text>;
 
   return (
-    <Container size={"90%"}>
+    <Container size="xl" px={{ base: "xs", sm: "md" }} py={{ base: "sm", sm: "md" }}>
       <ProfileHeader
         user={userData}
         onUserUpdated={(user: User) => {
@@ -66,7 +66,7 @@ export function ProfilePage() {
           updateCurrentUser(user);
         }}
       />
-      <Box mt="xl" p="md">
+      <Box mt="lg">
         <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
         <Box mt="md">
           {activeTab === "myRecipes" && (

@@ -17,6 +17,7 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../../../hooks/useRequireAuth";
 
 const linkStyles = {
@@ -32,6 +33,7 @@ const linkStyles = {
 };
 
 export function SocialMediaFollow() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { requireAuth } = useRequireAuth();
@@ -71,12 +73,11 @@ export function SocialMediaFollow() {
             <Group gap="xs" align="center" h={28}>
               <IconChefHat size={26} color="#ff6b00" />
               <Title order={4} lh={1}>
-                Gastronova
+                {t("common.appName")}
               </Title>
             </Group>
             <Text size="sm" c="dimmed" maw={400}>
-              Dünya mutfağından ilham veren tarifleri gerçek zamanlı keşfedin,
-              kendi lezzetlerinizi paylaşın ve toplulukla etkileşime geçin.
+              {t("footer.tagline")}
             </Text>
           </Stack>
 
@@ -90,7 +91,7 @@ export function SocialMediaFollow() {
           >
             <Stack gap={6}>
               <Text fw={700} size="sm" h={28} style={{ display: "flex", alignItems: "center" }}>
-                Hızlı Bağlantılar
+                {t("footer.quickLinks")}
               </Text>
               <Anchor
                 component={Link}
@@ -99,7 +100,7 @@ export function SocialMediaFollow() {
                 styles={linkStyles}
                 onClick={goHome}
               >
-                Ana Sayfa
+                {t("nav.home")}
               </Anchor>
               <Anchor
                 component="button"
@@ -108,7 +109,7 @@ export function SocialMediaFollow() {
                 onClick={shareRecipe}
                 styles={linkStyles}
               >
-                Tarif Paylaş
+                {t("footer.shareRecipe")}
               </Anchor>
               <Anchor
                 component="button"
@@ -117,13 +118,13 @@ export function SocialMediaFollow() {
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 styles={linkStyles}
               >
-                Yukarı Çık
+                {t("footer.backToTop")}
               </Anchor>
             </Stack>
 
             <Stack gap="sm">
               <Text fw={700} size="sm" h={28} style={{ display: "flex", alignItems: "center" }}>
-                Proje & Geliştirici
+                {t("footer.projectDev")}
               </Text>
               <Group gap="xs">
               <ActionIcon
@@ -134,7 +135,7 @@ export function SocialMediaFollow() {
                   variant="default"
                   size="lg"
                   radius="md"
-                  aria-label="Portfolyo"
+                  aria-label={t("footer.portfolio")}
                 >
                   <IconWorld size={18} />
                 </ActionIcon>
@@ -175,10 +176,10 @@ export function SocialMediaFollow() {
           gap="xs"
         >
           <Text size="sm" c="dimmed">
-            © 2026 Gastronova. Tüm hakları saklıdır.
+            {t("footer.rights")}
           </Text>
           <Text size="sm" c="dimmed">
-            Emre Çilo tarafından geliştirilmiştir.
+            {t("footer.developedBy")}
           </Text>
         </Flex>
       </Container>

@@ -1,9 +1,14 @@
 import React from "react";
 import { Group, Text, Tooltip, ActionIcon, Badge, Rating } from "@mantine/core";
 import { IconHeart, IconMessageCircle, IconStar } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { CustomButton } from "../../atoms/CustomButton";
 import { useSocket } from "../../../hooks/useSocket";
 import { useRecipe } from "../../../contexts/RecipeContext";
+import {
+  formatLocaleNumber,
+  formatLocaleRating,
+} from "../../../utils/localeFormat";
 
 interface RecipeActionsProps {
   isFavorite: boolean;
@@ -26,6 +31,8 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   onRating,
   recipeId,
 }) => {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.slice(0, 2) || "tr";
   const { emit } = useSocket();
   const { updateFavoriteStatus } = useRecipe();
 
@@ -43,7 +50,11 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   return (
     <Group justify="space-between" mt="xl">
       <Tooltip
-        label={isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}
+        label={
+          isFavorite
+            ? t("recipes.removeFavorite")
+            : t("recipes.addFavorite")
+        }
       >
         <ActionIcon
           color={isFavorite ? "red" : "gray"}
@@ -63,20 +74,24 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
         radius="xl"
         size="md"
       >
-        <IconMessageCircle size={20} style={{ marginRight: "10px" }} />
-        Yorumlar
-        <Badge ml="xs" variant="filled" size="sm" color="orange">
-          {commentCount}
+        <IconMessageCircle size={20} style={{ marginInlineEnd: "10px" }} />
+        {t("detail.comments")}
+        <Badge ms="xs" variant="filled" size="sm" color="orange">
+          {formatLocaleNumber(commentCount, lang)}
         </Badge>
       </CustomButton>
 
       <Group gap="xs">
         <IconStar size={24} color="orange" />
         <Text size="lg" fw={700}>
-          {averageRating.toFixed(1)}
+          {formatLocaleRating(averageRating, lang)}
         </Text>
         <Text size="sm" c="dimmed">
-          ({ratingCount} değerlendirme)
+          (
+          {t("detail.ratings", {
+            count: formatLocaleNumber(ratingCount, lang),
+          })}
+          )
         </Text>
         <Rating value={averageRating} onChange={handleRating} />
       </Group>

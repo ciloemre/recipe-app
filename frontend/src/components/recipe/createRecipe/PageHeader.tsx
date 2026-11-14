@@ -12,12 +12,11 @@ export function PageHeader({ title }: PageHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <Group p="sm" mb="xl">
+    <Group mb={{ base: "md", sm: "xl" }} align="center">
       <ActionIcon
         variant="subtle"
         size="md"
         onClick={() => navigate("/recipes")}
-        mb="md"
       >
         <IconArrowLeft size={32} />
       </ActionIcon>

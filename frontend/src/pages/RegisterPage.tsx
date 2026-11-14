@@ -5,16 +5,20 @@ import {
   Center,
   Box,
   Anchor,
+  Group,
   useMantineTheme,
 } from "@mantine/core";
 import { IconChefHat } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { RegisterForm } from "../components/recipe/RegisterForm";
+import { LanguageSwitcher } from "../components/header/LanguageSwitcher";
 import CustomTitle from "../components/atoms/CustomTitle";
 import { useAuth } from "../contexts/AuthContext";
 
 const RegisterPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const { register } = useAuth();
@@ -28,19 +32,19 @@ const RegisterPage: React.FC = () => {
     try {
       await register(values);
       notifications.show({
-        title: "Başarılı",
-        message: "Kayıt işlemi tamamlandı",
+        title: t("common.success"),
+        message: t("auth.registerSuccess"),
         color: "green",
       });
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Kayıt hatası:", error);
       notifications.show({
-        title: "Hata",
+        title: t("common.error"),
         message:
           error instanceof Error
             ? error.message
-            : "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.",
+            : t("auth.registerError"),
         color: "red",
       });
     }
@@ -69,8 +73,12 @@ const RegisterPage: React.FC = () => {
             width: "100%",
             maxWidth: "450px",
             boxSizing: "border-box",
+            position: "relative",
           }}
         >
+          <Group justify="flex-end" mb="sm">
+            <LanguageSwitcher />
+          </Group>
           <Center>
             <IconChefHat
               style={{
@@ -97,7 +105,7 @@ const RegisterPage: React.FC = () => {
               textWrap: "balance",
             }}
           >
-            Lezzetli Tarifler Dünyasına Katılın!
+            {t("auth.welcomeRegister")}
           </CustomTitle>
 
           <RegisterForm
@@ -112,7 +120,7 @@ const RegisterPage: React.FC = () => {
             onClick={() => navigate("/recipes")}
             style={{ display: "block", width: "100%", textAlign: "center" }}
           >
-            Kayıt olmadan tariflere göz at
+            {t("auth.browseWithoutRegister")}
           </Anchor>
         </Paper>
       </Container>

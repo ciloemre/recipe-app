@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,8 +7,8 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
-import { theme } from "./theme/theme";
+import { DirectionProvider, MantineProvider } from "@mantine/core";
+import { theme } from "./theme/theme.tsx";
 import Layout from "./components/layout/layout.tsx";
 import HomePage from "./pages/HomePage";
 import CreateRecipePage from "./pages/CreateRecipePage.tsx";
@@ -26,6 +26,7 @@ import { ProtectedRoute } from "./components/recipe/ProtectedRoute";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/notifications/styles.css";
+import { getStoredLocale } from "./i18n";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -39,77 +40,83 @@ function ScrollToTop() {
 }
 
 const App: React.FC = () => {
+  const [initialDir] = useState<"ltr" | "rtl">(() =>
+    getStoredLocale() === "ar" ? "rtl" : "ltr"
+  );
+
   return (
-    <MantineProvider theme={theme}>
-      <Notifications />
-      <ModalsProvider>
-        <AuthProvider>
-          <RecipeProvider>
-            <Router>
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<SplashScreen />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route
-                  element={
-                    <Layout>
-                      <Outlet />
-                    </Layout>
-                  }
-                >
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/recipes" element={<RecipePage />} />
-                  <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+    <DirectionProvider initialDirection={initialDir}>
+      <MantineProvider theme={theme}>
+        <Notifications />
+        <ModalsProvider>
+          <AuthProvider>
+            <RecipeProvider>
+              <Router>
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<SplashScreen />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
                   <Route
-                    path="/favorites"
                     element={
-                      <ProtectedRoute>
-                        <FavoriteRecipesPage />
-                      </ProtectedRoute>
+                      <Layout>
+                        <Outlet />
+                      </Layout>
                     }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <ProfilePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/create"
-                    element={
-                      <ProtectedRoute>
-                        <CreateRecipePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/create-recipe"
-                    element={
-                      <ProtectedRoute>
-                        <CreateRecipePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/recipe-form"
-                    element={
-                      <ProtectedRoute>
-                        <CreateRecipePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/logout" element={<LogoutPage />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/home" replace />} />
-              </Routes>
-            </Router>
-          </RecipeProvider>
-        </AuthProvider>
-      </ModalsProvider>
-    </MantineProvider>
+                  >
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/recipes" element={<RecipePage />} />
+                    <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+                    <Route
+                      path="/favorites"
+                      element={
+                        <ProtectedRoute>
+                          <FavoriteRecipesPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute>
+                          <ProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/create"
+                      element={
+                        <ProtectedRoute>
+                          <CreateRecipePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/create-recipe"
+                      element={
+                        <ProtectedRoute>
+                          <CreateRecipePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/recipe-form"
+                      element={
+                        <ProtectedRoute>
+                          <CreateRecipePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/logout" element={<LogoutPage />} />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/home" replace />} />
+                </Routes>
+              </Router>
+            </RecipeProvider>
+          </AuthProvider>
+        </ModalsProvider>
+      </MantineProvider>
+    </DirectionProvider>
   );
 };
 

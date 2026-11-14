@@ -445,6 +445,55 @@ export const deleteCommentReply = async (
   }
 };
 
+export interface RecipeTranslationResult {
+  recipeId: string;
+  targetLang: string;
+  cached?: boolean;
+  fallback?: boolean;
+  title: string;
+  description: string;
+  ingredients: string[];
+  instructions: string[];
+}
+
+export const translateRecipeContent = async (
+  recipeId: string,
+  targetLang: "en" | "ar",
+  mode: "card" | "full" = "full"
+): Promise<RecipeTranslationResult> => {
+  try {
+    const response = await api.post<RecipeTranslationResult>(
+      "/translate/recipe",
+      { recipeId, targetLang, mode }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Tarif çevrilemedi");
+  }
+};
+
+export interface TextTranslationResult {
+  targetLang: string;
+  fallback?: boolean;
+  text: string;
+  translatedText: string;
+}
+
+export const translateTextContent = async (
+  text: string,
+  targetLang: "en" | "ar"
+): Promise<TextTranslationResult> => {
+  try {
+    const response = await api.post<TextTranslationResult>("/translate/text", {
+      text,
+      targetLang,
+    });
+    return response.data;
+  } catch (error) {
+    return handleError(error, "Metin çevrilemedi");
+  }
+};
+
 export const logoutUser = async (): Promise<void> => {
   try {
     const token = localStorage.getItem(TOKEN_KEY);

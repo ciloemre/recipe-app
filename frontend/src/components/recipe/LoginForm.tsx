@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { TextInput, PasswordInput, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useTranslation } from "react-i18next";
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
     initialValues: {
@@ -14,9 +16,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       password: "",
     },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Geçersiz email"),
+      email: (value) =>
+        /^\S+@\S+$/.test(value) ? null : t("auth.invalidEmail"),
       password: (value) =>
-        value.length < 6 ? "Şifre en az 6 karakter olmalıdır" : null,
+        value.length < 6 ? t("auth.passwordMin") : null,
     },
   });
 
@@ -26,7 +29,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       await onSubmit(values.email, values.password);
     } catch (error) {
       console.error("Giriş hatası:", error);
-      form.setErrors({ email: "Giriş başarısız", password: "Giriş başarısız" });
+      form.setErrors({
+        email: t("auth.loginFailed"),
+        password: t("auth.loginFailed"),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -42,19 +48,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       >
         <TextInput
           required
-          label="Email"
-          placeholder="ornek@email.com"
+          label={t("auth.email")}
+          placeholder={t("auth.emailPlaceholder")}
           {...form.getInputProps("email")}
         />
         <PasswordInput
           required
-          label="Şifre"
-          placeholder="Şifreniz"
+          label={t("auth.password")}
+          placeholder={t("auth.passwordPlaceholder")}
           mt="md"
           {...form.getInputProps("password")}
         />
         <Button type="submit" fullWidth mt="xl" loading={isLoading}>
-          Giriş Yap
+          {t("nav.login")}
         </Button>
       </form>
     </Box>

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { SimpleGrid, Container, Box } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { RecipeCard } from "./recipeCard/RecipeCard";
 import { Recipe } from "../../../types/types";
 import styles from "./RecipeList.module.css";
 import { useSocket } from "../../../hooks/useSocket";
 import { PaginatedList } from "../../../components/recipe/PaginatedList";
+import { useTranslatedRecipes } from "../../../hooks/useTranslatedRecipes";
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -17,7 +19,9 @@ export function RecipeList({
   favorites,
   onFavoriteToggle,
 }: RecipeListProps) {
+  const { t } = useTranslation();
   const [recipes, setRecipes] = useState(initialRecipes);
+  const displayRecipes = useTranslatedRecipes(recipes);
   const { on, off } = useSocket();
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export function RecipeList({
   if (recipes.length === 0) {
     return (
       <Container size="xl" px="xs">
-        <div className={styles.noRecipeMessage}>Hiç tarif bulunamadı.</div>
+        <div className={styles.noRecipeMessage}>{t("recipes.noneFound")}</div>
       </Container>
     );
   }
@@ -77,9 +81,12 @@ export function RecipeList({
   return (
     <Box py="lg">
       <PaginatedList
-        items={recipes}
+        items={displayRecipes}
         itemsPerPage={12}
-        containerProps={{ size: "90%", px: "xs" }}
+        containerProps={{
+          size: "xl",
+          px: { base: "xs", sm: "md" },
+        }}
         renderItems={(paginatedRecipes) => (
           <SimpleGrid
             cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}

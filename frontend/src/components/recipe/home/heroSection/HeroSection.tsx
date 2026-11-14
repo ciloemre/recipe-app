@@ -8,9 +8,12 @@ import {
   Overlay,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import styles from "./HeroSection.module.css";
 
 export function HeroSection() {
+  const { t } = useTranslation();
+
   return (
     <Box className={styles.heroBox}>
       <Overlay
@@ -21,11 +24,10 @@ export function HeroSection() {
       <Container size="xl" className={styles.container}>
         <Stack justify="center" align="center" className={styles.stack}>
           <Title order={1} className={styles.title}>
-            Lezzetli Tarifler Dünyasına Hoş Geldiniz
+            {t("hero.title")}
           </Title>
           <Text c={"white"} size="lg" className={styles.text}>
-            Binlerce tarif, sayısız lezzet keşfi... Mutfağınızda yeni maceralar
-            sizi bekliyor!
+            {t("hero.subtitle")}
           </Text>
           <Button
             component={Link}
@@ -33,7 +35,7 @@ export function HeroSection() {
             size="lg"
             className={styles.button}
           >
-            Tarifleri Keşfet
+            {t("hero.cta")}
           </Button>
         </Stack>
       </Container>

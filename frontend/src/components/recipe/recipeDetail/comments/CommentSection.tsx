@@ -1,5 +1,6 @@
 import { useState, forwardRef, useEffect } from "react";
 import { Box, Title, Stack } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../../contexts/AuthContext";
 import {
   addComment,
@@ -26,6 +27,7 @@ interface CommentSectionProps {
 
 export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(
   ({ comments, recipeId, refreshRecipe, onRecipeChange }, ref) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { requireAuth } = useRequireAuth();
     const [editingCommentId, setEditingCommentId] = useState<string | null>(
@@ -166,7 +168,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(
     return (
       <Box ref={ref} mt="xl">
         <Title order={2} mb="lg" c="orange">
-          Yorumlar
+          {t("comments.title")}
         </Title>
         <Stack gap="xl">
           <CommentForm onSubmit={handleCommentSubmit} />

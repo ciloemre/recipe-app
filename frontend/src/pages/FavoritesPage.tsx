@@ -1,12 +1,15 @@
 import { useState, useCallback, useMemo } from "react";
 import { Text, SimpleGrid, Container, Box, Loader, Center } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { RecipeCard } from "../components/recipe/recipe/recipeCard/RecipeCard";
 import { SearchForm } from "../components/recipe/recipe/searchForm/SearchForm";
 import { Recipe } from "../types/types";
 import { useRecipe } from "../contexts/RecipeContext";
 import { PaginatedList } from "../components/recipe/PaginatedList";
+import { useTranslatedRecipes } from "../hooks/useTranslatedRecipes";
 
 export function FavoritesPage() {
+  const { t } = useTranslation();
   const {
     recipes,
     favorites,
@@ -47,6 +50,8 @@ export function FavoritesPage() {
     });
   }, [filteredFavorites, sortBy]);
 
+  const displayFavorites = useTranslatedRecipes(sortedFavorites);
+
   const handleToggleFavorite = async (recipeId: string) => {
     try {
       const isFavorite = await toggleFavoriteRecipe(recipeId);
@@ -75,7 +80,7 @@ export function FavoritesPage() {
   if (favorites.length === 0) {
     return (
       <Container mt={40} size="xl">
-        <Text>Henüz favori tarifiniz yok.</Text>
+        <Text>{t("favorites.empty")}</Text>
       </Container>
     );
   }
@@ -83,7 +88,7 @@ export function FavoritesPage() {
   if (favoriteRecipes.length === 0) {
     return (
       <Container mt={40} size="xl">
-        <Text>Favori tarifler şu an listede görünmüyor.</Text>
+        <Text>{t("favorites.unavailable")}</Text>
       </Container>
     );
   }
@@ -93,11 +98,11 @@ export function FavoritesPage() {
       <Box py="25px">
         <SearchForm onSearch={handleSearch} />
       </Box>
-      {sortedFavorites.length === 0 ? (
-        <Text>Bu kriterlere uyan favori tarif bulunamadı.</Text>
+      {displayFavorites.length === 0 ? (
+        <Text>{t("favorites.emptyFiltered")}</Text>
       ) : (
         <PaginatedList<Recipe>
-          items={sortedFavorites}
+          items={displayFavorites}
           itemsPerPage={12}
           containerProps={{ size: "100%", p: 0 }}
           renderItems={(paginatedFavorites) => (

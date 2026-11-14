@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Avatar,
   Paper,
@@ -14,15 +14,16 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconEdit } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { User } from "../../../types/types";
 import { updateProfile } from "../../../api/api";
 import { useSocket } from "../../../hooks/useSocket";
 import {
-  confirmDifference,
   getPasswordChecks,
   PASSWORD_RULES,
 } from "../../../utils/passwordValidation";
 import { resizeImage } from "../../../utils/imageUtils";
+import { formatLocaleNumber } from "../../../utils/localeFormat";
 import styles from "./ProfileHeader.module.css";
 
 interface ProfileHeaderProps {
@@ -30,7 +31,17 @@ interface ProfileHeaderProps {
   onUserUpdated: (user: User) => void;
 }
 
+const RULE_KEYS = {
+  minLength: "profile.ruleMinLength",
+  uppercase: "profile.ruleUppercase",
+  lowercase: "profile.ruleLowercase",
+  number: "profile.ruleNumber",
+  special: "profile.ruleSpecial",
+} as const;
+
 export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.slice(0, 2) || "tr";
   const [opened, setOpened] = useState(false);
   const [saving, setSaving] = useState(false);
   const [avatar, setAvatar] = useState(user.avatar || "");
@@ -68,13 +79,13 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
     },
     validate: {
       name: (value) =>
-        value.trim().length < 2 ? "İsim en az 2 karakter olmalıdır" : null,
+        value.trim().length < 2 ? t("profile.nameMin") : null,
       username: (value) => {
         if (value.trim().length < 3) {
-          return "Kullanıcı adı en az 3 karakter olmalıdır";
+          return t("profile.usernameMin");
         }
         if (!/^[a-zA-Z0-9_]+$/.test(value.trim())) {
-          return "Yalnızca harf, rakam ve alt çizgi kullanılabilir";
+          return t("profile.usernameChars");
         }
         return null;
       },
@@ -82,20 +93,24 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
         if (!value && !values.confirmPassword && !values.currentPassword) {
           return null;
         }
-        const checks = getPasswordChecks(value, values.confirmPassword);
-        if (!checks.minLength) return "Şifre en az 8 karakter olmalıdır";
-        if (!checks.uppercase) return "En az bir büyük harf gerekli";
-        if (!checks.lowercase) return "En az bir küçük harf gerekli";
-        if (!checks.number) return "En az bir rakam gerekli";
-        if (!checks.special) return "En az bir işaret gerekli";
+        const passwordChecks = getPasswordChecks(value, values.confirmPassword);
+        if (!passwordChecks.minLength) return t("profile.passwordMin8");
+        if (!passwordChecks.uppercase) return t("profile.passwordUpper");
+        if (!passwordChecks.lowercase) return t("profile.passwordLower");
+        if (!passwordChecks.number) return t("profile.passwordNumber");
+        if (!passwordChecks.special) return t("profile.passwordSpecial");
         return null;
       },
       confirmPassword: (value, values) => {
         if (!values.newPassword && !value) return null;
-        return value !== values.newPassword ? "Şifreler eşit değil" : null;
+        return value !== values.newPassword
+          ? t("profile.passwordsMismatch")
+          : null;
       },
       currentPassword: (value, values) => {
-        if (values.newPassword && !value) return "Mevcut şifre gerekli";
+        if (values.newPassword && !value) {
+          return t("profile.currentPasswordRequired");
+        }
         return null;
       },
     },
@@ -120,15 +135,37 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
   );
   const showRules = form.values.newPassword.length > 0;
   const missing = PASSWORD_RULES.filter((rule) => !checks[rule.key]).map(
-    (rule) => rule.label
+    (rule) => t(RULE_KEYS[rule.key])
   );
-  const met = PASSWORD_RULES.filter((rule) => checks[rule.key]).map(
-    (rule) => rule.label
+  const met = PASSWORD_RULES.filter((rule) => checks[rule.key]).map((rule) =>
+    t(RULE_KEYS[rule.key])
   );
-  const difference = confirmDifference(
-    form.values.newPassword,
-    form.values.confirmPassword
-  );
+
+  const difference = useMemo(() => {
+    const password = form.values.newPassword;
+    const confirmPassword = form.values.confirmPassword;
+    if (!confirmPassword) return null;
+    if (password === confirmPassword) {
+      return { ok: true, text: t("profile.passwordsEqual") };
+    }
+    if (password.startsWith(confirmPassword)) {
+      return {
+        ok: false,
+        text: t("profile.charsMissing", {
+          count: password.length - confirmPassword.length,
+        }),
+      };
+    }
+    if (password && confirmPassword.startsWith(password)) {
+      return {
+        ok: false,
+        text: t("profile.charsExtra", {
+          count: confirmPassword.length - password.length,
+        }),
+      };
+    }
+    return { ok: false, text: t("profile.passwordsMismatch") };
+  }, [form.values.newPassword, form.values.confirmPassword, t]);
 
   const handleSave = form.onSubmit(async (values) => {
     setSaving(true);
@@ -146,16 +183,16 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
       });
       onUserUpdated(updated);
       notifications.show({
-        title: "Kaydedildi",
-        message: "Profil bilgilerin güncellendi",
+        title: t("profile.savedTitle"),
+        message: t("profile.savedMessage"),
         color: "green",
       });
       setOpened(false);
     } catch (error) {
       notifications.show({
-        title: "Hata",
+        title: t("common.error"),
         message:
-          error instanceof Error ? error.message : "Profil güncellenemedi",
+          error instanceof Error ? error.message : t("profile.updateError"),
         color: "red",
       });
     } finally {
@@ -176,26 +213,32 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
             {user.name.slice(0, 1).toUpperCase()}
           </Avatar>
           <div>
-          <Title order={2} className={styles.title}>
-            {user.name}
-          </Title>
-          <Text className={styles.username}>@{user.username}</Text>
-          <Text size="sm" style={{ opacity: 0.9 }}>
-            {followerCount} Takipçi · {followingCount} Takip
-          </Text>
-          <Text className={styles.email}>{user.email}</Text>
+            <Title order={2} className={styles.title}>
+              {user.name}
+            </Title>
+            <Text className={styles.username}>@{user.username}</Text>
+            <Text size="sm" style={{ opacity: 0.9 }}>
+              {t("profile.followersCount", {
+                count: formatLocaleNumber(followerCount, lang),
+              })}{" "}
+              ·{" "}
+              {t("profile.followingCount", {
+                count: formatLocaleNumber(followingCount, lang),
+              })}
+            </Text>
+            <Text className={styles.email}>{user.email}</Text>
           </div>
         </Group>
         <Button className={styles.editButton} onClick={openEditor}>
-          <IconEdit size={16} style={{ marginRight: 8 }} />
-          Profili Düzenle
+          <IconEdit size={16} style={{ marginInlineEnd: 8 }} />
+          {t("profile.editProfile")}
         </Button>
       </div>
 
       <Modal
         opened={opened}
         onClose={() => setOpened(false)}
-        title="Profili Düzenle"
+        title={t("profile.editProfile")}
         centered
       >
         <form onSubmit={handleSave}>
@@ -211,7 +254,7 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
                   color="orange"
                   onClick={() => fileRef.current?.click()}
                 >
-                  Fotoğraf seç
+                  {t("profile.selectPhoto")}
                 </Button>
                 {avatar && (
                   <Button
@@ -220,7 +263,7 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
                     color="red"
                     onClick={() => setAvatar("")}
                   >
-                    Fotoğrafı kaldır
+                    {t("profile.removePhoto")}
                   </Button>
                 )}
               </Stack>
@@ -238,35 +281,35 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
                   setAvatar(await resizeImage(file, 256));
                 } catch (error) {
                   notifications.show({
-                    title: "Hata",
+                    title: t("common.error"),
                     message:
                       error instanceof Error
                         ? error.message
-                        : "Fotoğraf eklenemedi",
+                        : t("profile.photoError"),
                     color: "red",
                   });
                 }
               }}
             />
             <TextInput
-              label="İsim"
+              label={t("profile.nameLabel")}
               required
               {...form.getInputProps("name")}
             />
             <TextInput
-              label="Kullanıcı adı"
+              label={t("profile.usernameLabel")}
               required
               {...form.getInputProps("username")}
             />
             <Text size="sm" c="dimmed">
-              Şifreyi değiştirmek istemezsen bu alanları boş bırak.
+              {t("profile.passwordHint")}
             </Text>
             <PasswordInput
-              label="Mevcut şifre"
+              label={t("profile.currentPassword")}
               {...form.getInputProps("currentPassword")}
             />
             <PasswordInput
-              label="Yeni şifre"
+              label={t("profile.newPassword")}
               {...form.getInputProps("newPassword")}
               error={
                 form.values.newPassword.length > 0
@@ -284,7 +327,7 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
               <Text size="xs">
                 {missing.length > 0 && (
                   <Text span c="red" size="xs">
-                    Eksik: {missing.join(", ")}
+                    {t("profile.missing")} {missing.join(", ")}
                   </Text>
                 )}
                 {missing.length > 0 && met.length > 0 && (
@@ -295,13 +338,13 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
                 )}
                 {met.length > 0 && (
                   <Text span c="teal" size="xs">
-                    Tamam: {met.join(", ")}
+                    {t("profile.done")} {met.join(", ")}
                   </Text>
                 )}
               </Text>
             )}
             <PasswordInput
-              label="Yeni şifre tekrar"
+              label={t("profile.confirmNewPassword")}
               {...form.getInputProps("confirmPassword")}
               error={
                 form.values.confirmPassword.length > 0
@@ -315,7 +358,7 @@ export function ProfileHeader({ user, onUserUpdated }: ProfileHeaderProps) {
               </Text>
             )}
             <Button type="submit" color="orange" loading={saving}>
-              Kaydet
+              {t("common.save")}
             </Button>
           </Stack>
         </form>

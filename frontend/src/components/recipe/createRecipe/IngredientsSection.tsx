@@ -1,8 +1,8 @@
-import { Group, Paper } from "@mantine/core";
-import { IconHeading, IconPlus } from "@tabler/icons-react";
+import { Paper } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import CustomTitle from "../../atoms/CustomTitle";
-import { CustomButton } from "../../atoms/CustomButton";
 import RecipeIngredientInput from "./RecipeIngredientInput";
+import { ListAddButtons } from "./ListRowActions";
 import {
   AddListItemOptions,
   isSectionHeading,
@@ -28,10 +28,12 @@ export function IngredientsSection({
   onAddArrayItem,
   onRemoveArrayItem,
 }: IngredientsSectionProps) {
+  const { t } = useTranslation();
+
   return (
-    <Paper p="md" mb="md">
+    <Paper p={{ base: "sm", sm: "md" }} mb="md">
       <CustomTitle level={3} mb="md">
-        Malzemeler
+        {t("create.ingredients")}
       </CustomTitle>
       {ingredients.map((ingredient: string, index: number) => {
         const heading = isSectionHeading(ingredient);
@@ -51,23 +53,15 @@ export function IngredientsSection({
               onAddArrayItem("ingredients", { index: index + 1, heading: true })
             }
             onRemove={() => onRemoveArrayItem(index, "ingredients")}
-            placeholder={`Malzeme ${index + 1}`}
+            placeholder={t("create.ingredientPlaceholder", { n: index + 1 })}
           />
         );
       })}
-      <Group gap="sm">
-        <CustomButton onClick={() => onAddArrayItem("ingredients")}>
-          <IconPlus size={16} style={{ marginRight: "5px" }} />
-          Malzeme Ekle
-        </CustomButton>
-        <CustomButton
-          variant="light"
-          onClick={() => onAddArrayItem("ingredients", { heading: true })}
-        >
-          <IconHeading size={16} style={{ marginRight: "5px" }} />
-          Başlık Ekle
-        </CustomButton>
-      </Group>
+      <ListAddButtons
+        addLabel={t("create.addIngredient")}
+        onAdd={() => onAddArrayItem("ingredients")}
+        onAddHeading={() => onAddArrayItem("ingredients", { heading: true })}
+      />
     </Paper>
   );
 }

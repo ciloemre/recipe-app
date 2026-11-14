@@ -19,10 +19,16 @@ import {
   IconStar,
   IconCalendar,
 } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { Recipe } from "../../../../types/types";
 import styles from "./RecipeCard.module.css";
 import { useSocket } from "../../../../hooks/useSocket";
 import { displayPersonName } from "../../../../utils/displayName";
+import {
+  formatLocaleDate,
+  formatLocaleNumber,
+  formatLocaleRating,
+} from "../../../../utils/localeFormat";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -36,22 +42,15 @@ function getRatingColor(rating: number) {
   return "red";
 }
 
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("tr-TR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export function RecipeCard({
   recipe: initialRecipe,
   isFavorite,
   onFavoriteToggle,
 }: RecipeCardProps) {
+  const { t, i18n } = useTranslation();
   const [recipe, setRecipe] = useState(initialRecipe);
   const { on, off } = useSocket();
+  const lang = i18n.language?.slice(0, 2) || "tr";
 
   useEffect(() => {
     const handleRatingUpdate = (data: {
@@ -95,7 +94,10 @@ export function RecipeCard({
     setRecipe(initialRecipe);
   }, [initialRecipe]);
 
-  const authorName = displayPersonName(recipe.author, "Bilinmeyen Şef");
+  const authorName = displayPersonName(
+    recipe.author,
+    t("recipes.unknownChef")
+  );
 
   return (
     <Box className={styles.cardContainer}>
@@ -108,7 +110,7 @@ export function RecipeCard({
         aria-labelledby={`recipe-title-${recipe._id}`}
         className={styles.card}
       >
-        <Card.Section>
+        <Card.Section className={styles.imageSection}>
           <Image
             src={recipe.image}
             alt={recipe.title}
@@ -119,18 +121,13 @@ export function RecipeCard({
             className={styles.dateBadge}
             leftSection={<IconCalendar size={14} />}
           >
-            {formatDate(recipe.createdAt)}
+            {formatLocaleDate(recipe.createdAt, lang)}
           </Badge>
           <Badge
             color={getRatingColor(recipe.averageRating)}
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              zIndex: 1,
-            }}
+            className={styles.ratingBadge}
           >
-            {recipe.averageRating.toFixed(1)}
+            {formatLocaleRating(recipe.averageRating, lang)}
           </Badge>
         </Card.Section>
         <Group p="apart" mt="md" mb="xs">
@@ -165,7 +162,7 @@ export function RecipeCard({
             {authorName.slice(0, 1).toUpperCase()}
           </Avatar>
           <Text lineClamp={1} size="sm" className={styles.cardAuthor}>
-            <b>Şef:</b> {authorName}
+            <b>{t("recipes.chefPrefix")}</b> {authorName}
           </Text>
         </Group>
         <div className={styles.cardFooter}>
@@ -174,7 +171,11 @@ export function RecipeCard({
               color="red"
               variant="subtle"
               onClick={() => onFavoriteToggle(recipe._id)}
-              aria-label={isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}
+              aria-label={
+                isFavorite
+                  ? t("recipes.removeFavorite")
+                  : t("recipes.addFavorite")
+              }
             >
               {isFavorite ? (
                 <IconHeartFilled size={18} />
@@ -182,26 +183,32 @@ export function RecipeCard({
                 <IconHeart size={18} />
               )}
             </ActionIcon>
-            <Group gap={5}>
+            <Group gap={5} wrap="nowrap">
               <IconStar size={18} />
               <Text size="sm">
-                {recipe.ratings?.length || recipe.ratingCount || 0}
+                {formatLocaleNumber(
+                  recipe.ratings?.length || recipe.ratingCount || 0,
+                  lang
+                )}
               </Text>
             </Group>
-            <Group gap={5}>
+            <Group gap={5} wrap="nowrap">
               <IconMessageCircle size={18} />
               <Text size="sm">
-                {recipe.comments?.length || recipe.commentCount || 0}
+                {formatLocaleNumber(
+                  recipe.comments?.length || recipe.commentCount || 0,
+                  lang
+                )}
               </Text>
             </Group>
           </div>
           <Button
             component={Link}
             to={`/recipe/${recipe._id}`}
-            aria-label={`Tarifi gör: ${recipe.title}`}
+            aria-label={t("recipes.viewRecipe", { title: recipe.title })}
             className={styles.viewButton}
           >
-            Tarifi Gör
+            {t("latest.viewRecipe")}
           </Button>
         </div>
       </Card>

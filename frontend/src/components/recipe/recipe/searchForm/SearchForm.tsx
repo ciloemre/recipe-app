@@ -1,31 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { TextInput, ActionIcon, Box, Select, Group } from "@mantine/core";
 import { IconSearch, IconAdjustments } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import styles from "./SearchForm.module.css";
 
 interface SearchFormProps {
   onSearch: (query: string, category: string, sortBy: string) => void;
 }
-
-const categories = [
-  { value: "all", label: "Tümü" },
-  { value: "Ana Yemek", label: "Ana Yemek" },
-  { value: "Ara Sıcak", label: "Ara Sıcak" },
-  { value: "Çorba", label: "Çorba" },
-  { value: "Tatlı", label: "Tatlı" },
-  { value: "Salata", label: "Salata" },
-  { value: "Kahvaltılık", label: "Kahvaltılık" },
-  { value: "Atıştırmalık", label: "Atıştırmalık" },
-  { value: "İçecek", label: "İçecek" },
-  { value: "Vegan", label: "Vegan" },
-  { value: "Vejetaryen", label: "Vejetaryen" },
-  { value: "Glutensiz", label: "Glutensiz" },
-];
-
-const sortOptions = [
-  { value: "newest", label: "En Yeni" },
-  { value: "rating", label: "En Yüksek Puan" },
-];
 
 function useDebounce(callback: (...args: any[]) => void, delay: number) {
   const debouncedCallback = useCallback(
@@ -40,9 +21,36 @@ function useDebounce(callback: (...args: any[]) => void, delay: number) {
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+
+  const categories = useMemo(
+    () => [
+      { value: "all", label: t("categoryLabels.all") },
+      { value: "Ana Yemek", label: t("categoryLabels.AnaYemek") },
+      { value: "Ara Sıcak", label: t("categoryLabels.AraSicak") },
+      { value: "Çorba", label: t("categoryLabels.Corba") },
+      { value: "Tatlı", label: t("categoryLabels.Tatli") },
+      { value: "Salata", label: t("categoryLabels.Salata") },
+      { value: "Kahvaltılık", label: t("categoryLabels.Kahvaltilik") },
+      { value: "Atıştırmalık", label: t("categoryLabels.Atistirmalik") },
+      { value: "İçecek", label: t("categoryLabels.Icecek") },
+      { value: "Vegan", label: t("categoryLabels.Vegan") },
+      { value: "Vejetaryen", label: t("categoryLabels.Vejetaryen") },
+      { value: "Glutensiz", label: t("categoryLabels.Glutensiz") },
+    ],
+    [t]
+  );
+
+  const sortOptions = useMemo(
+    () => [
+      { value: "newest", label: t("recipes.newest") },
+      { value: "rating", label: t("recipes.topRated") },
+    ],
+    [t]
+  );
 
   const debouncedSearch = useDebounce(
     (query: string, cat: string, sort: string) => {
@@ -69,7 +77,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
         <TextInput
           className={styles.textInput}
           leftSection={<IconSearch className={styles.searchIcon} />}
-          placeholder="Tarif ara..."
+          placeholder={t("recipes.searchPlaceholder")}
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
@@ -77,14 +85,14 @@ export function SearchForm({ onSearch }: SearchFormProps) {
           data={categories}
           value={category}
           onChange={handleCategoryChange}
-          placeholder="Kategori"
+          placeholder={t("recipes.category")}
           className={styles.select}
         />
         <Select
           data={sortOptions}
           value={sortBy}
           onChange={handleSortChange}
-          placeholder="Sırala"
+          placeholder={t("recipes.sort")}
           className={styles.select}
         />
         <ActionIcon className={styles.actionIcon}>

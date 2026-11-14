@@ -10,6 +10,7 @@ import authRoutes from "./routes/authRoutes";
 import recipeRoutes from "./routes/recipeRoutes";
 import userRoutes from "./routes/userRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
+import translateRoutes from "./routes/translateRoutes";
 import { errorHandler } from "./middleware/errorMiddleware";
 
 dotenv.config();
@@ -115,6 +116,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/translate", translateRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

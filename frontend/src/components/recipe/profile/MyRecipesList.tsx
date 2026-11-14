@@ -4,6 +4,8 @@ import { Recipe } from "../../../types/types";
 import { PaginatedList } from "../../../components/recipe/PaginatedList";
 import { SearchForm } from "../recipe/searchForm/SearchForm";
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useTranslatedRecipes } from "../../../hooks/useTranslatedRecipes";
 
 interface MyRecipesListProps {
   recipes: Recipe[];
@@ -16,6 +18,7 @@ export function MyRecipesList({
   onDeleteRecipe,
   onEditRecipe,
 }: MyRecipesListProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -38,10 +41,13 @@ export function MyRecipesList({
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       } else if (sortBy === "rating") {
+        return (b.averageRating ?? 0) - (a.averageRating ?? 0);
       }
       return 0;
     });
   }, [filteredRecipes, sortBy]);
+
+  const displayRecipes = useTranslatedRecipes(sortedRecipes);
 
   const handleSearch = (query: string, category: string, sortBy: string) => {
     setSearchQuery(query);
@@ -50,7 +56,7 @@ export function MyRecipesList({
   };
 
   if (recipes.length === 0) {
-    return <Text>Henüz tarif eklememişsiniz.</Text>;
+    return <Text>{t("profile.noRecipesYet")}</Text>;
   }
 
   return (
@@ -59,7 +65,7 @@ export function MyRecipesList({
         <SearchForm onSearch={handleSearch} />
       </Box>
       <PaginatedList<Recipe>
-        items={sortedRecipes}
+        items={displayRecipes}
         itemsPerPage={12}
         containerProps={{ size: "100%", p: 0 }}
         renderItems={(paginatedRecipes) => (

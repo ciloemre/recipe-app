@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Paper, Title, Container } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { Recipe, RecipeFormData } from "../../../types/types";
 import { BasicInfoSection } from "../createRecipe/BasicInfoSection";
 import { IngredientsSection } from "../createRecipe/IngredientsSection";
@@ -28,6 +29,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<RecipeFormData>({
     title: recipe.title,
     description: recipe.description,
@@ -103,14 +105,14 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
   };
 
   const handleCancelClick = () => {
-    openCancelConfirmModal("Düzenleme", onCancel);
+    openCancelConfirmModal(t("detail.edit"), onCancel);
   };
 
   return (
     <Container size="xl">
       <Paper shadow="md" p="xl" radius="md">
         <Title order={2} mb="xl">
-          Tarifi Düzenle
+          {t("detail.editRecipe")}
         </Title>
         <form onSubmit={handleSubmit}>
           <BasicInfoSection
@@ -167,7 +169,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
             onServingsChange={(value) => handleChange("servings", value)}
           />
           <CustomButton type="submit" fullWidth mt="xl">
-            Değişiklikleri Kaydet
+            {t("detail.saveChanges")}
           </CustomButton>
           <CustomButton
             variant="outline"
@@ -175,7 +177,7 @@ export const RecipeEditForm: React.FC<RecipeEditFormProps> = ({
             mt="md"
             onClick={handleCancelClick}
           >
-            İptal
+            {t("detail.cancel")}
           </CustomButton>
         </form>
       </Paper>

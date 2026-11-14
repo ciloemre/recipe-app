@@ -1,16 +1,20 @@
 import { Title, Grid, Card, Text, Box, Stack } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import defaultImage from "../../../../assets/h2.png";
 import styles from "./CookingTips.module.css";
 
 export function CookingTips() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.slice(0, 2) || "tr";
+
   return (
-    <Box className={styles.container}>
+    <Box className={styles.container} key={lang}>
       <Grid gutter="xl" align="stretch">
-        <Grid.Col span={{ base: 12, sm: 4, lg: 5 }}>
+        <Grid.Col span={{ base: 12, sm: 4, lg: 5 }} className={styles.imageCol}>
           <Box className={styles.imageContainer}>
             <img
               src={defaultImage}
-              alt="Lezzetli Yemek ve Malzemeler"
+              alt={t("tips.imageAlt")}
               className={styles.image}
             />
           </Box>
@@ -22,29 +26,23 @@ export function CookingTips() {
             justify="center"
             style={{ height: "100%" }}
           >
-            <Title className={styles.title}>
-              Mutfak İpuçları ve Püf Noktaları
-            </Title>
+            <Title className={styles.title}>{t("tips.title")}</Title>
             <Card shadow="sm" p="lg" radius="md" className={styles.card}>
-              <Text className={styles.cardTitle}>Keskin Bıçaklar</Text>
-              <Text size="sm" color="dimmed">
-                Bıçaklarınızı her kullanımdan önce bileyin. Keskin bıçaklar,
-                yiyecekleri daha kolay ve güvenli bir şekilde kesmenizi sağlar.
+              <Text className={styles.cardTitle}>{t("tips.sharpKnives")}</Text>
+              <Text size="sm" c="dimmed">
+                {t("tips.sharpKnivesText")}
               </Text>
             </Card>
             <Card shadow="sm" p="lg" radius="md" className={styles.card}>
-              <Text className={styles.cardTitle}>Mise en Place</Text>
-              <Text size="sm" color="dimmed">
-                Yemek yapmaya başlamadan önce tüm malzemeleri hazırlayın ve
-                ölçün. Bu, pişirme sürecini daha düzenli ve stressiz hale
-                getirir.
+              <Text className={styles.cardTitle}>{t("tips.miseEnPlace")}</Text>
+              <Text size="sm" c="dimmed">
+                {t("tips.miseEnPlaceText")}
               </Text>
             </Card>
             <Card shadow="sm" p="lg" radius="md" className={styles.card}>
-              <Text className={styles.cardTitle}>Tuz Kullanımı</Text>
-              <Text size="sm" color="dimmed">
-                Yemeğinizi pişirirken aşama aşama tuz ekleyin. Bu, lezzetin daha
-                iyi dağılmasını ve dengelenmesini sağlar.
+              <Text className={styles.cardTitle}>{t("tips.salt")}</Text>
+              <Text size="sm" c="dimmed">
+                {t("tips.saltText")}
               </Text>
             </Card>
           </Stack>

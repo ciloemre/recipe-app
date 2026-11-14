@@ -13,10 +13,17 @@
   flex: 1;
 }
 
+.textInput :global(.mantine-Input-section[data-position="left"]) {
+  inset-inline-start: 12px;
+  inset-inline-end: auto;
+  width: auto;
+}
+
 .textInput input {
   height: 42px;
   border-radius: 40px;
-  padding-left: 40px;
+  padding-inline-start: 42px !important;
+  padding-inline-end: 16px !important;
   font-size: 16px;
 }
 
@@ -45,11 +52,12 @@
 }
 
 .searchForm .searchIcon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
   color: var(--mantine-gray-5);
+  flex-shrink: 0;
+}
+
+:global([dir="rtl"]) .textInput input {
+  text-align: right;
 }
 
 @media (max-width: 768px) {

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Textarea, Group } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { Comment } from "../../../../types/types";
 import { CustomButton } from "../../../atoms/CustomButton";
 import { openCancelConfirmModal } from "../../../../utils/modals";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 
 interface EditCommentFormProps {
   comment: Comment;
@@ -17,30 +18,22 @@ export const EditCommentForm: React.FC<EditCommentFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [editedContent, setEditedContent] = useState(comment.text);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(editedContent);
-    showNotification("success", "Yorum başarıyla düzenlendi");
+    notifications.show({
+      title: t("common.success"),
+      message: t("detail.commentUpdated"),
+      color: "teal",
+      icon: <IconCheck size="1.1rem" />,
+    });
   };
 
   const handleCancelClick = () => {
-    openCancelConfirmModal("Düzenleme", onCancel);
-  };
-
-  const showNotification = (type: "success" | "error", message: string) => {
-    notifications.show({
-      title: type === "success" ? "Başarılı" : "Dikkat",
-      message,
-      color: type === "success" ? "teal" : "red",
-      icon:
-        type === "success" ? (
-          <IconCheck size="1.1rem" />
-        ) : (
-          <IconX size="1.1rem" />
-        ),
-    });
+    openCancelConfirmModal(t("detail.edit"), onCancel);
   };
 
   return (
@@ -53,10 +46,10 @@ export const EditCommentForm: React.FC<EditCommentFormProps> = ({
       />
       <Group justify="flex-end">
         <CustomButton variant="outline" onClick={handleCancelClick}>
-          İptal
+          {t("detail.cancel")}
         </CustomButton>
 
-        <CustomButton type="submit">Kaydet</CustomButton>
+        <CustomButton type="submit">{t("common.save")}</CustomButton>
       </Group>
     </form>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Title, Text, Box, Button, ScrollArea, Group } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import {
   isSectionHeading,
   sectionHeadingText,
@@ -12,8 +13,9 @@ interface RecipeIngredientsProps {
 
 export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
   ingredients,
-  maxHeight = 200, // Varsayılan maksimum yükseklik (piksel cinsinden)
+  maxHeight = 200,
 }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [showButton, setShowButton] = useState(false);
@@ -33,7 +35,7 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
   return (
     <Box mt="xl">
       <Title order={2} mb="md" c="orange">
-        Malzemeler
+        {t("detail.ingredients")}
       </Title>
       <Box
         style={{
@@ -114,7 +116,7 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
             mt="xs"
             fullWidth
           >
-            {expanded ? "Daha az göster" : "Tümünü göster"}
+            {expanded ? t("detail.showLess") : t("detail.showAll")}
           </Button>
         )}
       </Box>

@@ -10,7 +10,9 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { useTranslation } from "react-i18next";
 import { LoginForm } from "../components/recipe/LoginForm";
+import { LanguageSwitcher } from "../components/header/LanguageSwitcher";
 import { IconChefHat } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -22,6 +24,7 @@ import {
 } from "../utils/welcome";
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const { login, user } = useAuth();
@@ -46,20 +49,20 @@ const LoginPage: React.FC = () => {
       sessionStorage.setItem(WELCOME_NAME_KEY, loggedIn.name);
       sessionStorage.removeItem(LOGIN_WELCOME_PENDING_KEY);
       notifications.show({
-        title: "Başarılı",
-        message: "Giriş yapıldı",
+        title: t("common.success"),
+        message: t("auth.loginSuccess"),
         color: "green",
       });
       navigate("/", { replace: true });
     } catch (error) {
       sessionStorage.removeItem(LOGIN_WELCOME_PENDING_KEY);
       console.error("Giriş hatası:", error);
-      let errorMessage = "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.";
+      let errorMessage = t("auth.loginError");
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data.message || errorMessage;
       }
       notifications.show({
-        title: "Hata",
+        title: t("common.error"),
         message: errorMessage,
         color: "red",
       });
@@ -96,8 +99,12 @@ const LoginPage: React.FC = () => {
             width: "100%",
             maxWidth: "450px",
             boxSizing: "border-box",
+            position: "relative",
           }}
         >
+          <Group justify="flex-end" mb="sm">
+            <LanguageSwitcher />
+          </Group>
           <Center>
             <IconChefHat
               style={{
@@ -124,21 +131,21 @@ const LoginPage: React.FC = () => {
               textWrap: "balance",
             }}
           >
-            Lezzetli Tarifler Dünyasına Hoş Geldiniz!
+            {t("auth.welcomeLogin")}
           </Title>
 
           <LoginForm onSubmit={handleSubmit} />
 
           <Group justify="space-between" mt="xl" gap="sm" wrap="wrap">
             <Anchor href="#" onClick={handleRegisterClick} size="xs">
-              Hesabınız yok mu? Kayıt olun
+              {t("auth.noAccount")} {t("nav.register")}
             </Anchor>
             <Anchor
               href="#"
               onClick={(event) => event.preventDefault()}
               size="xs"
             >
-              Şifrenizi mi unuttunuz?
+              {t("auth.forgotPassword")}
             </Anchor>
           </Group>
           <Anchor
@@ -149,7 +156,7 @@ const LoginPage: React.FC = () => {
             onClick={() => navigate("/recipes")}
             style={{ display: "block", width: "100%", textAlign: "center" }}
           >
-            Giriş yapmadan tariflere göz at
+            {t("auth.browseWithoutLogin")}
           </Anchor>
         </Paper>
       </Container>

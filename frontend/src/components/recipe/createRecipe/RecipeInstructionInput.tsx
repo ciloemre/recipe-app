@@ -1,4 +1,4 @@
-import { Group } from "@mantine/core";
+import { Box, Group } from "@mantine/core";
 import { CustomTextarea } from "../../atoms/CustomTextarea";
 import { CustomInput } from "../../atoms/CustomInput";
 import { ListRowActions } from "./ListRowActions";
@@ -29,10 +29,11 @@ export default function RecipeInstructionInput({
   isHeading = false,
 }: RecipeInstructionInputProps) {
   return (
-    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="flex-start" gap="xs">
+    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="center" gap="xs" w="100%">
+      <Box style={{ flex: 1, minWidth: 0 }}>
       {isHeading ? (
         <CustomInput
-          style={{ flex: 1, minWidth: 0 }}
+          w="100%"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Başlık (ör. Sosun hazırlanışı)"
@@ -40,12 +41,15 @@ export default function RecipeInstructionInput({
         />
       ) : (
         <CustomTextarea
-          style={{ flex: 1, minWidth: 0 }}
+          w="100%"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          minRows={2}
+          autosize
         />
       )}
+      </Box>
       <ListRowActions onInsertHeading={onInsertHeading} onRemove={onRemove} />
     </Group>
   );

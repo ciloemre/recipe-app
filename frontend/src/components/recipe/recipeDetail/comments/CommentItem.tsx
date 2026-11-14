@@ -17,15 +17,24 @@ import {
   IconHeartFilled,
   IconMessageReply,
 } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { Comment, CommentReply, User } from "../../../../types/types";
 import { openDeleteCommentModal } from "../../../../utils/modals";
 import { notifications } from "@mantine/notifications";
 import { displayPersonName } from "../../../../utils/displayName";
+import { translateTextContent } from "../../../../api/api";
+import { AppLocale, isAppLocale } from "../../../../i18n";
+import {
+  formatLocaleDateTime,
+  formatLocaleNumber,
+} from "../../../../utils/localeFormat";
 
 function ReplyComposer({
   value,
   placeholder,
   sending,
+  sendLabel,
+  cancelLabel,
   onChange,
   onSubmit,
   onCancel,
@@ -33,6 +42,8 @@ function ReplyComposer({
   value: string;
   placeholder: string;
   sending: boolean;
+  sendLabel: string;
+  cancelLabel: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
   onCancel: () => void;
@@ -48,10 +59,10 @@ function ReplyComposer({
       />
       <Group gap="xs">
         <Button size="xs" color="orange" loading={sending} onClick={onSubmit}>
-          Gönder
+          {sendLabel}
         </Button>
         <Button size="xs" variant="subtle" color="gray" onClick={onCancel}>
-          Vazgeç
+          {cancelLabel}
         </Button>
       </Group>
     </Stack>
@@ -88,9 +99,15 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   style,
   maxHeight = 100,
 }) => {
+  const { t, i18n } = useTranslation();
+  const locale = (i18n.language?.slice(0, 2) || "tr") as AppLocale;
   const [expanded, setExpanded] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const [replyOpen, setReplyOpen] = useState(false);
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [translatedLocale, setTranslatedLocale] = useState<string | null>(null);
+  const [showTranslated, setShowTranslated] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [replyTarget, setReplyTarget] = useState<{
     id: string;
     name: string;
@@ -114,12 +131,18 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
   const showDeleteNotification = () => {
     notifications.show({
-      title: "Yorum Silindi",
-      message: "Yorum başarıyla silindi.",
+      title: t("detail.commentDeletedTitle"),
+      message: t("detail.commentDeletedMessage"),
       color: "teal",
       icon: <IconCheck size="1.1rem" />,
     });
   };
+
+  useEffect(() => {
+    setTranslatedText(null);
+    setTranslatedLocale(null);
+    setShowTranslated(false);
+  }, [locale, comment.text]);
 
   useEffect(() => {
     if (textRef.current) {
@@ -129,8 +152,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
   const displayName =
     typeof comment.user === "object"
-      ? displayPersonName(comment.user, "Kullanıcı")
-      : "Kullanıcı";
+      ? displayPersonName(comment.user, t("comments.user"))
+      : t("comments.user");
   const initial = displayName.charAt(0).toUpperCase() || "K";
   const likes = comment.likes ?? [];
   const isLiked = Boolean(
@@ -142,8 +165,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
   const personName = (person: CommentReply["user"]) =>
     typeof person === "object"
-      ? displayPersonName(person, "Kullanıcı")
-      : "Kullanıcı";
+      ? displayPersonName(person, t("comments.user"))
+      : t("comments.user");
 
   const personId = (person: CommentReply["user"] | Comment["user"]) =>
     typeof person === "object" ? person._id : "";
@@ -205,7 +228,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           <Stack gap={4}>
             <Text fw={500}>{displayName}</Text>
             <Text size="xs" c="dimmed">
-              {new Date(comment.date).toLocaleString()}
+              {formatLocaleDateTime(comment.date, locale)}
             </Text>
           </Stack>
         </Group>
@@ -218,7 +241,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               onClick={() => onEdit(comment._id)}
               leftSection={<IconEdit size={14} />}
             >
-              Düzenle
+              {t("detail.edit")}
             </Button>
             <Button
               variant="subtle"
@@ -227,7 +250,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               onClick={handleDelete}
               leftSection={<IconTrash size={14} />}
             >
-              Sil
+              {t("detail.delete")}
             </Button>
           </Group>
         )}
@@ -245,7 +268,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           ref={textRef}
           style={{ lineHeight: 1.6, wordBreak: "break-word" }}
         >
-          {comment.text}
+          {showTranslated && translatedText ? translatedText : comment.text}
         </Text>
         {!expanded && showButton && (
           <Box
@@ -268,7 +291,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           fullWidth
           size="xs"
         >
-          {expanded ? "Daha az göster" : "Daha fazla göster"}
+          {expanded ? t("comments.showLess") : t("comments.showMore")}
         </Button>
       )}
       <Group gap="xs" mt="sm">
@@ -281,7 +304,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             isLiked ? <IconHeartFilled size={14} /> : <IconHeart size={14} />
           }
         >
-          {likes.length}
+          {formatLocaleNumber(likes.length, locale)}
         </Button>
         <Button
           variant="subtle"
@@ -292,14 +315,64 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           }
           leftSection={<IconMessageReply size={14} />}
         >
-          Cevapla
+          {t("comments.reply")}
         </Button>
+        {isAppLocale(locale) && locale !== "tr" ? (
+          <Button
+            variant="subtle"
+            color="gray"
+            size="xs"
+            loading={translating}
+            onClick={async () => {
+              const targetLocale = (i18n.language?.slice(0, 2) ||
+                "tr") as AppLocale;
+              if (showTranslated) {
+                setShowTranslated(false);
+                return;
+              }
+              if (
+                translatedText &&
+                translatedLocale === targetLocale &&
+                targetLocale !== "tr"
+              ) {
+                setShowTranslated(true);
+                return;
+              }
+              if (!isAppLocale(targetLocale) || targetLocale === "tr") {
+                return;
+              }
+              setTranslating(true);
+              try {
+                const result = await translateTextContent(
+                  comment.text,
+                  targetLocale
+                );
+                setTranslatedText(result.translatedText);
+                setTranslatedLocale(targetLocale);
+                setShowTranslated(true);
+              } catch {
+                setTranslatedText(null);
+                setTranslatedLocale(null);
+              } finally {
+                setTranslating(false);
+              }
+            }}
+          >
+            {showTranslated
+              ? t("comments.showOriginal")
+              : translating
+                ? t("comments.translating")
+                : t("comments.translate")}
+          </Button>
+        ) : null}
       </Group>
       {replyOpen && !replyTarget && (
         <ReplyComposer
           value={replyText}
-          placeholder="Cevabını yaz..."
+          placeholder={t("comments.replyPlaceholder")}
           sending={replySending}
+          sendLabel={t("comments.send")}
+          cancelLabel={t("comments.cancel")}
           onChange={setReplyText}
           onSubmit={handleReplySubmit}
           onCancel={closeReply}
@@ -349,7 +422,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                       </Text>
                     )}
                     <Text size="xs" c="dimmed">
-                      {new Date(reply.date).toLocaleString()}
+                      {formatLocaleDateTime(reply.date, locale)}
                     </Text>
                     </Stack>
                   </Group>
@@ -364,7 +437,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                         )
                       }
                     >
-                      Sil
+                      {t("detail.delete")}
                     </Button>
                   )}
                 </Group>
@@ -391,7 +464,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                     )
                   }
                 >
-                  {(reply.likes ?? []).length}
+                  {formatLocaleNumber((reply.likes ?? []).length, locale)}
                 </Button>
                 <Button
                   variant="subtle"
@@ -406,14 +479,16 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                   }
                   leftSection={<IconMessageReply size={12} />}
                 >
-                  Cevapla
+                  {t("comments.reply")}
                 </Button>
                 </Group>
                 {replyTarget?.replyId === reply._id && (
                   <ReplyComposer
                     value={replyText}
-                    placeholder={`${replyTarget.name} kişisine cevap...`}
+                    placeholder={t("comments.replyPlaceholder")}
                     sending={replySending}
+                    sendLabel={t("comments.send")}
+                    cancelLabel={t("comments.cancel")}
                     onChange={setReplyText}
                     onSubmit={handleReplySubmit}
                     onCancel={closeReply}

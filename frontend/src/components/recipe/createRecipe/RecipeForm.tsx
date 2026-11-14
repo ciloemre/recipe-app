@@ -1,5 +1,6 @@
 import React from "react";
-import { Container } from "@mantine/core";
+import { Box } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { RecipeFormData } from "../../../types/types";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { IngredientsSection } from "./IngredientsSection";
@@ -44,27 +45,31 @@ export function RecipeForm({
   onCategoryChange,
   isLoading,
 }: RecipeFormProps) {
+  const { t } = useTranslation();
+
   return (
-    <Container size="xl">
-      <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit}>
+      <Box px={{ base: "sm", sm: "md" }}>
         <BasicInfoSection
           formData={formData}
           onInputChange={onInputChange}
           onImageUpload={onImageUpload}
           onCategoryChange={onCategoryChange}
         />
-        <IngredientsSection
-          ingredients={formData.ingredients}
-          onArrayInputChange={onArrayInputChange}
-          onAddArrayItem={onAddArrayItem}
-          onRemoveArrayItem={onRemoveArrayItem}
-        />
-        <InstructionsSection
-          instructions={formData.instructions}
-          onArrayInputChange={onArrayInputChange}
-          onAddArrayItem={onAddArrayItem}
-          onRemoveArrayItem={onRemoveArrayItem}
-        />
+      </Box>
+      <IngredientsSection
+        ingredients={formData.ingredients}
+        onArrayInputChange={onArrayInputChange}
+        onAddArrayItem={onAddArrayItem}
+        onRemoveArrayItem={onRemoveArrayItem}
+      />
+      <InstructionsSection
+        instructions={formData.instructions}
+        onArrayInputChange={onArrayInputChange}
+        onAddArrayItem={onAddArrayItem}
+        onRemoveArrayItem={onRemoveArrayItem}
+      />
+      <Box px={{ base: "sm", sm: "md" }}>
         <CookingInfoSection
           formData={formData}
           onNumberInputChange={onNumberInputChange}
@@ -77,9 +82,9 @@ export function RecipeForm({
           mt="xl"
           loading={isLoading}
         >
-          Tarifi Kaydet
+          {t("create.saveRecipe")}
         </CustomButton>
-      </form>
-    </Container>
+      </Box>
+    </form>
   );
 }

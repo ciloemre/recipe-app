@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { CustomInput } from "../../atoms/CustomInput";
 import { CustomTextarea } from "../../atoms/CustomTextarea";
 import { FileButton, Button, Image, Select, Text, Box, Group } from "@mantine/core";
@@ -42,6 +43,7 @@ export function BasicInfoSection({
   onImageUpload,
   onCategoryChange,
 }: BasicInfoSectionProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(formData.title);
   const [titleLength, setTitleLength] = useState(formData.title.length);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function BasicInfoSection({
     <>
       <Box mb="md">
         <CustomInput
-          label="Tarif Başlığı"
+          label={t("create.recipeTitle")}
           name="title"
           value={title}
           onChange={handleTitleChange}
@@ -95,11 +97,11 @@ export function BasicInfoSection({
           color={titleLength === MAX_TITLE_LENGTH ? "red" : "dimmed"}
           mt={5}
         >
-          {titleLength}/{MAX_TITLE_LENGTH} karakter
+          {t("create.chars", { count: titleLength, max: MAX_TITLE_LENGTH })}
         </Text>
       </Box>
       <CustomTextarea
-        label="Tarif Açıklaması"
+        label={t("create.description")}
         name="description"
         value={formData.description}
         onChange={onInputChange}
@@ -107,8 +109,8 @@ export function BasicInfoSection({
         mb="md"
       />
       <Select
-        label="Kategori"
-        placeholder="Bir kategori seçin"
+        label={t("create.category")}
+        placeholder={t("create.categoryPlaceholder")}
         data={categories}
         value={formData.category}
         onChange={(value) => onCategoryChange(value || "")}
@@ -117,7 +119,7 @@ export function BasicInfoSection({
       />
       <Box mb="md">
         <Text size="sm" fw={500} mb={6}>
-          Resim Yükle
+          {t("create.uploadImage")}
         </Text>
         <Group gap="sm" align="center">
           <FileButton
@@ -132,16 +134,16 @@ export function BasicInfoSection({
                 color="orange"
                 leftSection={<IconUpload size={16} />}
               >
-                Dosya seç
+                {t("create.chooseFile")}
               </Button>
             )}
           </FileButton>
           <Text size="sm" c="dimmed">
-            {fileName ?? "PNG, JPG veya WEBP"}
+            {fileName ?? t("create.fileHint")}
           </Text>
         </Group>
         <Text size="xs" c="dimmed" mt={6}>
-          Tıklayınca bilgisayarınızdaki resimler açılır.
+          {t("create.fileHelp")}
         </Text>
         {formData.image ? (
           <Image

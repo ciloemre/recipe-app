@@ -1,7 +1,19 @@
 .container {
+  position: relative;
   margin-bottom: 100px;
   margin-right: 20px;
   margin-top: 20px;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+:global([dir="rtl"]) .container {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.imageCol {
+  overflow: visible;
 }
 
 .imageContainer {
@@ -17,8 +29,22 @@
   object-fit: cover;
 }
 
+:global([dir="rtl"]) .image {
+  transform: scaleX(-1);
+}
+
+:global([dir="rtl"]) .imageCol {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+:global([dir="rtl"]) .imageContainer {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .title {
-  text-align: right;
+  text-align: end;
   color: var(--mantine-color-orange-6);
   margin-bottom: 20px;
   font-size: 30px;
@@ -36,7 +62,8 @@
   font-weight: bold;
 }
 .stack {
-  padding: 0px 70px 80px 0px;
+  padding-block: 0 80px;
+  padding-inline: 0 70px;
 }
 
 @media (max-width: 1200px) {
@@ -45,7 +72,8 @@
     margin-bottom: 20px;
   }
   .stack {
-    padding: 0px 20px 0px 40px;
+    padding-block: 0;
+    padding-inline: 40px 20px;
   }
 }
 
@@ -68,6 +96,28 @@
     margin-bottom: 15px;
     font-size: 25px;
   }
+
+  :global([dir="rtl"]) .imageCol {
+    padding: 0 !important;
+    min-height: 300px;
+  }
+
+  :global([dir="rtl"]) .imageContainer {
+    position: absolute;
+    right: 0;
+    left: auto;
+    width: 10px;
+    max-width: 10px;
+    margin: 0;
+  }
+
+  :global([dir="rtl"]) .image {
+    position: absolute;
+    right: 0;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+  }
 }
 
 @media (max-width: 468px) {
@@ -80,11 +130,16 @@
     height: 400px;
   }
   .stack {
-    padding: 0px 0px 0px 20px;
+    padding-block: 0;
+    padding-inline: 20px 0;
   }
   .container .title {
     margin-bottom: 12px;
     font-size: 22px;
+  }
+
+  :global([dir="rtl"]) .image {
+    right: 0;
   }
 }
 

@@ -1,7 +1,8 @@
 import React, { useCallback, useRef, useEffect } from "react";
-import { Container, Paper, Stack, ActionIcon } from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { Container, Paper, Stack, ActionIcon, Text, Loader, Center, useDirection } from "@mantine/core";
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { RecipeHeader } from "../components/recipe/recipeDetail/RecipeDetailHeader";
 import { RecipeImage } from "../components/recipe/recipeDetail/RecipeImage";
 import { RecipeActions } from "../components/recipe/recipeDetail/RecipeDetailActions";
@@ -10,6 +11,7 @@ import { RecipeEditForm } from "../components/recipe/recipeDetail/RecipeEditForm
 import { CommentSection } from "../components/recipe/recipeDetail/comments/CommentSection";
 import { useRecipeDetail } from "../hooks/recipeDetailHooks/useRecipeDetail";
 import { useRecipeEdit } from "../hooks/recipeDetailHooks/useRecipeEdit";
+import { useRecipeTranslation } from "../hooks/useRecipeTranslation";
 import { ErrorDisplay } from "../components/common/ErrorDisplay";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { useAuth } from "../contexts/AuthContext";
@@ -19,6 +21,8 @@ import { useSocket } from "../hooks/useSocket";
 import { patchRecipeWithUser, UserUpdate } from "../utils/patchUser";
 
 const RecipeDetailPage: React.FC = () => {
+  const { t } = useTranslation();
+  const { dir } = useDirection();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -32,6 +36,11 @@ const RecipeDetailPage: React.FC = () => {
   const { isFavorite, toggleFavorite } = useFavoriteActions(recipe);
   const { handleRating } = useRatingActions(recipe, setRecipe, setError);
   const { on, off } = useSocket();
+  const {
+    displayRecipe,
+    isTranslating,
+    showFallbackNotice,
+  } = useRecipeTranslation(recipe);
 
   const commentSectionRef = useRef<HTMLDivElement>(null);
   const recipeIdRef = useRef(recipe?._id);
@@ -136,6 +145,8 @@ const RecipeDetailPage: React.FC = () => {
   if (error || !recipe)
     return <ErrorDisplay message={error || "Tarif bulunamadı."} />;
 
+  const viewRecipe = displayRecipe || recipe;
+
   const isAuthor = user
     ? typeof recipe.author === "string"
       ? user._id === recipe.author
@@ -156,27 +167,48 @@ const RecipeDetailPage: React.FC = () => {
   }
 
   return (
-    <Container size="90%" py="xl">
+    <Container
+      size="lg"
+      px={{ base: "xs", sm: "md" }}
+      py={{ base: "sm", sm: "xl" }}
+    >
       <ActionIcon
         variant="subtle"
         size="lg"
         onClick={() => navigate("/recipes")}
-        mb="md"
+        mb="sm"
       >
-        <IconArrowLeft size="1.5rem" />
+        {dir === "rtl" ? (
+          <IconArrowRight size="1.5rem" />
+        ) : (
+          <IconArrowLeft size="1.5rem" />
+        )}
       </ActionIcon>
-      <Paper shadow="md" p="xl" withBorder>
+      <Paper shadow="md" p={{ base: "sm", sm: "xl" }} withBorder>
         <Stack>
+          {isTranslating ? (
+            <Center py="xs">
+              <Loader size="sm" color="orange" />
+              <Text size="sm" c="dimmed" ms="sm">
+                {t("detail.translating")}
+              </Text>
+            </Center>
+          ) : null}
+          {showFallbackNotice ? (
+            <Text size="sm" c="dimmed">
+              {t("detail.translationFallback")}
+            </Text>
+          ) : null}
           <RecipeHeader
-            recipe={recipe}
+            recipe={viewRecipe}
             isAuthor={isAuthor}
             onEditClick={() => handleEditClick(true)}
             onDeleteClick={handleDeleteClick}
           />
           <RecipeImage
-            src={recipe.image}
-            alt={recipe.title}
-            rating={recipe.averageRating}
+            src={viewRecipe.image}
+            alt={viewRecipe.title}
+            rating={viewRecipe.averageRating}
           />
           <RecipeActions
             isFavorite={isFavorite}
@@ -188,7 +220,7 @@ const RecipeDetailPage: React.FC = () => {
             onRating={handleRating}
             recipeId={recipe._id}
           />
-          <RecipeInfo recipe={recipe} />
+          <RecipeInfo recipe={viewRecipe} />
           <CommentSection
             ref={commentSectionRef}
             comments={recipe.comments}

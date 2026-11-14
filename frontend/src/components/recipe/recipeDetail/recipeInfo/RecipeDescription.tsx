@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Text, Box, Button, Title } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 
 interface RecipeDescriptionProps {
   description: string;
@@ -10,6 +11,7 @@ export const RecipeDescription: React.FC<RecipeDescriptionProps> = ({
   description,
   maxHeight = 100,
 }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
@@ -23,7 +25,7 @@ export const RecipeDescription: React.FC<RecipeDescriptionProps> = ({
   return (
     <Box mt="xl">
       <Title order={2} mb="md" c="orange">
-        Tarif Açıklaması
+        {t("detail.description")}
       </Title>
       <Box
         style={{
@@ -61,8 +63,7 @@ export const RecipeDescription: React.FC<RecipeDescriptionProps> = ({
               style={{
                 position: "absolute",
                 bottom: 0,
-                left: 0,
-                right: 0,
+                insetInline: 0,
                 height: "50px",
                 background: "linear-gradient(transparent, white)",
               }}
@@ -77,7 +78,7 @@ export const RecipeDescription: React.FC<RecipeDescriptionProps> = ({
             mt="xs"
             fullWidth
           >
-            {expanded ? "Daha az göster" : "Daha fazla göster"}
+            {expanded ? t("detail.showLess") : t("detail.showMore")}
           </Button>
         )}
       </Box>

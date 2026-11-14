@@ -1,4 +1,5 @@
 import { Container } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { RecipeForm } from "../components/recipe/createRecipe/RecipeForm";
 import { AuthenticatedContent } from "../components/recipe/AuthenticatedContent";
 import { useRecipeFormSubmit } from "../hooks/useRecipeFormSubmit";
@@ -10,6 +11,7 @@ import {
 import PageHeader from "../components/recipe/createRecipe/PageHeader";
 
 export function CreateRecipePage() {
+  const { t } = useTranslation();
   const {
     formData,
     handleChange,
@@ -21,8 +23,8 @@ export function CreateRecipePage() {
 
   return (
     <AuthenticatedContent>
-      <Container p="xl" size="xl">
-        <PageHeader title="Yeni Tarif Oluştur" backLink="/recipes" />
+      <Container px={{ base: "sm", sm: "xl" }} py={{ base: "md", sm: "xl" }} size="md">
+        <PageHeader title={t("create.title")} backLink="/recipes" />
         <RecipeForm
           formData={formData}
           onInputChange={(

@@ -1,8 +1,8 @@
-import { Group, Paper } from "@mantine/core";
-import { IconHeading, IconPlus } from "@tabler/icons-react";
+import { Paper } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import CustomTitle from "../../atoms/CustomTitle";
-import { CustomButton } from "../../atoms/CustomButton";
 import RecipeInstructionInput from "./RecipeInstructionInput";
+import { ListAddButtons } from "./ListRowActions";
 import {
   AddListItemOptions,
   isSectionHeading,
@@ -28,10 +28,12 @@ export function InstructionsSection({
   onAddArrayItem,
   onRemoveArrayItem,
 }: InstructionsSectionProps) {
+  const { t } = useTranslation();
+
   return (
-    <Paper p="md" mb="md">
+    <Paper p={{ base: "sm", sm: "md" }} mb="md">
       <CustomTitle level={3} mb="sm">
-        Hazırlanış Adımları
+        {t("create.instructions")}
       </CustomTitle>
       {instructions.map((instruction: string, index: number) => {
         const heading = isSectionHeading(instruction);
@@ -54,23 +56,15 @@ export function InstructionsSection({
               })
             }
             onRemove={() => onRemoveArrayItem(index, "instructions")}
-            placeholder={`Adım ${index + 1}`}
+            placeholder={t("create.stepPlaceholder", { n: index + 1 })}
           />
         );
       })}
-      <Group gap="sm">
-        <CustomButton onClick={() => onAddArrayItem("instructions")}>
-          <IconPlus size={16} style={{ marginRight: "5px" }} />
-          Adım Ekle
-        </CustomButton>
-        <CustomButton
-          variant="light"
-          onClick={() => onAddArrayItem("instructions", { heading: true })}
-        >
-          <IconHeading size={16} style={{ marginRight: "5px" }} />
-          Başlık Ekle
-        </CustomButton>
-      </Group>
+      <ListAddButtons
+        addLabel={t("create.addStep")}
+        onAdd={() => onAddArrayItem("instructions")}
+        onAddHeading={() => onAddArrayItem("instructions", { heading: true })}
+      />
     </Paper>
   );
 }

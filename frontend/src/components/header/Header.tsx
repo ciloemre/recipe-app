@@ -23,9 +23,11 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import classes from "./HeaderSearch.module.css";
 import recipe from "../../assets/recipe.png";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { NotificationBell } from "./NotificationBell";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
@@ -65,6 +67,7 @@ function NavbarLink({
 }
 
 export function Header() {
+  const { t } = useTranslation();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,13 +76,13 @@ export function Header() {
   const [active, setActive] = useState<number | null>(null);
 
   const authNavItems = [
-    { icon: IconToolsKitchen2, label: "Tarifler", to: "/recipes" },
-    { icon: IconHeart, label: "Favorilerim", to: "/favorites" },
-    { icon: IconUserCircle, label: "Profilim", to: "/profile" },
+    { icon: IconToolsKitchen2, label: t("nav.recipes"), to: "/recipes" },
+    { icon: IconHeart, label: t("nav.favorites"), to: "/favorites" },
+    { icon: IconUserCircle, label: t("nav.profile"), to: "/profile" },
   ];
 
   const guestNavItems = [
-    { icon: IconToolsKitchen2, label: "Tarifler", to: "/recipes" },
+    { icon: IconToolsKitchen2, label: t("nav.recipes"), to: "/recipes" },
   ];
 
   const navItems = user ? authNavItems : guestNavItems;
@@ -118,7 +121,7 @@ export function Header() {
       <Flex justify="space-between" align="center" className={classes.inner}>
         <Group className={classes.logoGroup}>
           <Link to="/home">
-            <Image src={recipe} alt="Yemek Tarifleri" height={40} />
+            <Image src={recipe} alt={t("nav.logoAlt")} height={40} />
           </Link>
         </Group>
 
@@ -134,23 +137,23 @@ export function Header() {
                 </div>
                 <span className={classes.sep} aria-hidden="true" />
                 <div className={classes.cluster}>
-                  <Tooltip label="Tarif Ekle" position="bottom">
+                  <Tooltip label={t("nav.addRecipe")} position="bottom">
                     <UnstyledButton
                       className={classes.addButton}
                       onClick={handleAddRecipe}
-                      aria-label="Tarif Ekle"
+                      aria-label={t("nav.addRecipe")}
                     >
                       <IconPlus
                         style={{ width: rem(18), height: rem(18) }}
                         stroke={1.7}
                       />
-                      <span className={classes.linkLabel}>Ekle</span>
+                      <span className={classes.linkLabel}>{t("nav.add")}</span>
                     </UnstyledButton>
                   </Tooltip>
                 </div>
                 <span className={classes.sep} aria-hidden="true" />
                 <div className={classes.cluster}>
-                  <NavbarLink icon={IconLogout} label="Çıkış" to="/logout" />
+                  <NavbarLink icon={IconLogout} label={t("nav.logout")} to="/logout" />
                 </div>
               </>
             ) : (
@@ -163,7 +166,7 @@ export function Header() {
                     variant="subtle"
                     className={classes.authButton}
                   >
-                    Giriş Yap
+                    {t("nav.login")}
                   </Button>
                   <Button
                     component={Link}
@@ -172,7 +175,7 @@ export function Header() {
                     color="orange"
                     className={classes.authButton}
                   >
-                    Kayıt Ol
+                    {t("nav.register")}
                   </Button>
                 </div>
               </>
@@ -180,13 +183,18 @@ export function Header() {
 
             <span className={classes.sep} aria-hidden="true" />
             <div className={classes.cluster}>
-              <Tooltip label="Tema" position="bottom">
+              <LanguageSwitcher />
+            </div>
+
+            <span className={classes.sep} aria-hidden="true" />
+            <div className={classes.cluster}>
+              <Tooltip label={t("common.theme")} position="bottom">
                 <ActionIcon
                   variant="subtle"
                   onClick={() => toggleColorScheme()}
                   size={36}
                   radius={12}
-                  aria-label="Tema"
+                  aria-label={t("common.theme")}
                   className={classes.themeToggle}
                 >
                   {colorScheme === "dark" ? (

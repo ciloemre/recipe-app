@@ -18,12 +18,18 @@ import {
   IconCalendar,
   IconCheck,
 } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { Recipe } from "../../../../types/types";
 import styles from "./MyRecipesCard.module.css";
-import { openDeleteConfirmModal } from "../../../../utils/modals";
+import { openConfirmModal } from "../../../../utils/modals";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { useSocket } from "../../../../hooks/useSocket";
+import {
+  formatLocaleDate,
+  formatLocaleNumber,
+  formatLocaleRating,
+} from "../../../../utils/localeFormat";
 
 interface MyRecipeCardProps {
   recipe: Recipe;
@@ -41,9 +47,11 @@ export function MyRecipesCard({
   recipe: initialRecipe,
   onDeleteRecipe,
 }: MyRecipeCardProps) {
+  const { t, i18n } = useTranslation();
   const [recipe, setRecipe] = useState(initialRecipe);
   const navigate = useNavigate();
   const { on, off } = useSocket();
+  const lang = i18n.language?.slice(0, 2) || "tr";
 
   useEffect(() => {
     const handleRatingUpdate = (data: {
@@ -92,34 +100,32 @@ export function MyRecipesCard({
   };
 
   const handleDelete = () => {
-    openDeleteConfirmModal("Tarifi", () => {
-      onDeleteRecipe(recipe._id)
-        .then(() => {
-          showDeleteNotification();
-        })
-        .catch((error) => {
-          console.error("Silme işlemi sırasında hata oluştu:", error);
-        });
-    });
+    openConfirmModal(
+      t("recipes.deleteTitle"),
+      t("recipes.deleteMessage"),
+      () => {
+        onDeleteRecipe(recipe._id)
+          .then(() => {
+            showDeleteNotification();
+          })
+          .catch((error) => {
+            console.error("Silme işlemi sırasında hata oluştu:", error);
+          });
+      },
+      undefined,
+      t("recipes.confirmDelete"),
+      t("recipes.cancelDelete")
+    );
   };
 
   const showDeleteNotification = () => {
     notifications.show({
-      title: "Tarif Silindi",
-      message: "Tarif başarıyla silindi.",
+      title: t("recipes.deletedTitle"),
+      message: t("recipes.deletedMessage"),
       color: "teal",
       icon: <IconCheck size="1.1rem" />,
     });
   };
-
-  function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("tr-TR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
 
   return (
     <Box className={styles.cardContainer}>
@@ -132,10 +138,10 @@ export function MyRecipesCard({
         aria-labelledby={`recipe-title-${recipe._id}`}
         className={styles.card}
       >
-        <Card.Section>
+        <Card.Section className={styles.imageSection}>
           <Image
             src={recipe.image}
-            height={160}
+            h={{ base: 230, sm: 190 }}
             alt={recipe.title}
             className={styles.cardImage}
           />
@@ -143,13 +149,13 @@ export function MyRecipesCard({
             className={styles.dateBadge}
             leftSection={<IconCalendar size={14} />}
           >
-            {formatDate(recipe.createdAt)}
+            {formatLocaleDate(recipe.createdAt, lang)}
           </Badge>
           <Badge
             color={getRatingColor(recipe.averageRating)}
             className={styles.ratingBadge}
           >
-            {recipe.averageRating.toFixed(1)}
+            {formatLocaleRating(recipe.averageRating, lang)}
           </Badge>
         </Card.Section>
         <Group p="apart" mt="md" mb="xs">
@@ -167,35 +173,41 @@ export function MyRecipesCard({
         </Text>
         <Divider my="sm" />
         <div className={styles.cardStats}>
-          <Group gap={5}>
+          <Group gap={5} wrap="nowrap">
             <IconStar size={18} />
             <Text size="sm">
-              {recipe.ratings?.length || recipe.ratingCount || 0}
+              {formatLocaleNumber(
+                recipe.ratings?.length || recipe.ratingCount || 0,
+                lang
+              )}
             </Text>
           </Group>
-          <Group gap={5}>
+          <Group gap={5} wrap="nowrap">
             <IconMessageCircle size={18} />
             <Text size="sm">
-              {recipe.comments?.length || recipe.commentCount || 0}
+              {formatLocaleNumber(
+                recipe.comments?.length || recipe.commentCount || 0,
+                lang
+              )}
             </Text>
           </Group>
         </div>
         <div className={styles.cardFooter}>
-          <Group>
+          <div className={styles.footerActions}>
             <ActionIcon color="blue" variant="subtle" onClick={handleEdit}>
               <IconEdit size={18} />
             </ActionIcon>
             <ActionIcon color="red" variant="subtle" onClick={handleDelete}>
               <IconTrash size={18} />
             </ActionIcon>
-          </Group>
+          </div>
           <Button
             component={Link}
             to={`/recipe/${recipe._id}`}
-            aria-label={`Tarifi gör: ${recipe.title}`}
+            aria-label={t("recipes.viewRecipe", { title: recipe.title })}
             className={styles.viewButton}
           >
-            Tarifi Gör
+            {t("latest.viewRecipe")}
           </Button>
         </div>
       </Card>

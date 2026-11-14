@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { Button, Group, Text } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
 import { useSocket } from "../../../hooks/useSocket";
 import { getFollowStatus, toggleFollow } from "../../../api/api";
+import { formatLocaleNumber } from "../../../utils/localeFormat";
 
 interface AuthorFollowProps {
   authorId: string;
 }
 
 export function AuthorFollow({ authorId }: AuthorFollowProps) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.slice(0, 2) || "tr";
   const { user } = useAuth();
   const { requireAuth } = useRequireAuth();
   const { emit, on, off, subscribeConnect } = useSocket();
@@ -60,7 +64,9 @@ export function AuthorFollow({ authorId }: AuthorFollowProps) {
   return (
     <Group gap={6} wrap="nowrap">
       <Text size="sm" c="dimmed">
-        {followerCount} Takipçi
+        {t("detail.followers", {
+          count: formatLocaleNumber(followerCount, lang),
+        })}
       </Text>
       {!isSelf && (
         <Button
@@ -70,7 +76,7 @@ export function AuthorFollow({ authorId }: AuthorFollowProps) {
           loading={loading}
           onClick={handleToggle}
         >
-          {isFollowing ? "Takip Ediliyor" : "Takip Et"}
+          {isFollowing ? t("detail.following") : t("detail.follow")}
         </Button>
       )}
     </Group>

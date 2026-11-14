@@ -30,7 +30,7 @@
 
 .button {
   background: linear-gradient(
-    to right,
+    to inline-end,
     var(--mantine-color-orange-6),
     var(--mantine-color-red-6)
   );

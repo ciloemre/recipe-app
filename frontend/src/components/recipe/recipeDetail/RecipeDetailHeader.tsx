@@ -6,12 +6,15 @@ import {
   IconTag,
   IconCheck,
 } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { Recipe } from "../../../types/types";
-import { openDeleteConfirmModal } from "../../../utils/modals";
+import { openConfirmModal } from "../../../utils/modals";
 import { notifications } from "@mantine/notifications";
 import styles from "./RecipeDetailHeader.module.css";
 import { displayPersonName } from "../../../utils/displayName";
 import { AuthorFollow } from "./AuthorFollow";
+import { categoryLabel } from "../../../utils/categoryLabel";
+import { formatLocaleDate } from "../../../utils/localeFormat";
 
 interface RecipeHeaderProps {
   recipe: Recipe;
@@ -26,24 +29,29 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
   onEditClick,
   onDeleteClick,
 }) => {
-  const authorName = displayPersonName(recipe.author, "Bilinmeyen Şef");
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.slice(0, 2) || "tr";
+  const authorName = displayPersonName(recipe.author, t("recipes.unknownChef"));
   const authorId =
     typeof recipe.author === "string" ? recipe.author : recipe.author?._id;
 
   const handleDeleteClick = () => {
-    openDeleteConfirmModal("Tarifi", () => {
-      onDeleteClick();
-      showDeleteNotification();
-    });
-  };
-
-  const showDeleteNotification = () => {
-    notifications.show({
-      title: "Tarif Silindi",
-      message: "Tarif başarıyla silindi.",
-      color: "teal",
-      icon: <IconCheck size="1.1rem" />,
-    });
+    openConfirmModal(
+      t("recipes.deleteTitle"),
+      t("recipes.deleteMessage"),
+      () => {
+        onDeleteClick();
+        notifications.show({
+          title: t("recipes.deletedTitle"),
+          message: t("recipes.deletedMessage"),
+          color: "teal",
+          icon: <IconCheck size="1.1rem" />,
+        });
+      },
+      undefined,
+      t("recipes.confirmDelete"),
+      t("recipes.cancelDelete")
+    );
   };
 
   return (
@@ -65,7 +73,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
             size="lg"
             color="yellow"
           >
-            {new Date(recipe.createdAt).toLocaleDateString()}
+            {formatLocaleDate(recipe.createdAt, lang)}
           </Badge>
           <Badge
             leftSection={<IconTag size={16} />}
@@ -73,7 +81,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
             size="lg"
             color="red"
           >
-            {recipe.category}
+            {categoryLabel(recipe.category, t)}
           </Badge>
         </div>
         {isAuthor && (
@@ -85,7 +93,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
               radius="md"
               size="sm"
             >
-              Düzenle
+              {t("detail.edit")}
             </Button>
             <Button
               variant="light"
@@ -94,7 +102,7 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
               radius="md"
               size="sm"
             >
-              Sil
+              {t("detail.delete")}
             </Button>
           </Group>
         )}

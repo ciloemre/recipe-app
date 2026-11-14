@@ -1,4 +1,5 @@
 import { SimpleGrid } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { CustomInput } from "../../atoms/CustomInput";
 import { RecipeFormData } from "../../../types/types";
 
@@ -13,11 +14,13 @@ export function CookingInfoSection({
   onNumberInputChange,
   onServingsChange,
 }: CookingInfoSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" mb="md">
       <CustomInput
         type="number"
-        label="Hazırlık Süresi (dakika)"
+        label={t("create.prepTime")}
         name="prepTime"
         value={formData.prepTime.toString()}
         onChange={(e) =>
@@ -27,7 +30,7 @@ export function CookingInfoSection({
       />
       <CustomInput
         type="number"
-        label="Pişirme Süresi (dakika)"
+        label={t("create.cookTime")}
         name="cookTime"
         value={formData.cookTime.toString()}
         onChange={(e) =>
@@ -37,9 +40,8 @@ export function CookingInfoSection({
       />
       <CustomInput
         type="text"
-        label="Porsiyon"
+        label={t("create.servings")}
         name="servings"
-        placeholder="ör. 4-6 kişilik, 1 tepsi"
         value={String(formData.servings ?? "")}
         onChange={(e) => onServingsChange(e.target.value)}
       />

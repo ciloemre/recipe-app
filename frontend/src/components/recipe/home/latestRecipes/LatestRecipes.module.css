@@ -25,6 +25,7 @@
 }
 
 .recipeImage {
+  display: block;
   width: 100%;
   height: 170px;
   object-fit: cover;
@@ -32,12 +33,14 @@
 
 .imageSection {
   position: relative;
+  line-height: 0;
 }
 
 .newBadge {
   position: absolute;
   top: 10px;
-  left: 10px;
+  inset-inline-start: 10px;
+  z-index: 2;
 }
 
 .container .recipeTitle {
@@ -91,6 +94,12 @@
 @media (max-width: 768px) {
   .container {
     margin-bottom: 20px;
+  }
+
+  .card {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .recipeTitle {

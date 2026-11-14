@@ -8,6 +8,7 @@ import {
   Anchor,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useTranslation } from "react-i18next";
 import {
   EMAIL_REGEX,
   USERNAME_REGEX,
@@ -31,6 +32,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSubmit,
   onLoginClick,
 }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
@@ -109,28 +111,28 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       <form onSubmit={handleSubmit}>
         <TextInput
           required
-          label="Ad Soyad"
-          placeholder="Adınız Soyadınız"
+          label={t("auth.name")}
+          placeholder={t("auth.namePlaceholder")}
           {...form.getInputProps("name")}
         />
         <TextInput
           required
-          label="Kullanıcı Adı"
-          placeholder="kullanici_adi"
+          label={t("auth.username")}
+          placeholder={t("auth.usernamePlaceholder")}
           mt="sm"
           {...form.getInputProps("username")}
         />
         <TextInput
           required
-          label="Email"
-          placeholder="ornek@email.com"
+          label={t("auth.email")}
+          placeholder={t("auth.emailPlaceholder")}
           mt="sm"
           {...form.getInputProps("email")}
         />
         <PasswordInput
           required
-          label="Şifre"
-          placeholder="Şifreniz"
+          label={t("auth.password")}
+          placeholder={t("auth.passwordPlaceholder")}
           mt="sm"
           {...form.getInputProps("password")}
           error={
@@ -143,7 +145,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <Text size="xs" mt={4} lh={1.35}>
             {missing.length > 0 && (
               <Text span c="red" size="xs">
-                Eksik: {missing.join(", ")}
+                {missing.join(", ")}
               </Text>
             )}
             {missing.length > 0 && met.length > 0 && (
@@ -154,15 +156,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             )}
             {met.length > 0 && (
               <Text span c="teal" size="xs">
-                Tamam: {met.join(", ")}
+                {met.join(", ")}
               </Text>
             )}
           </Text>
         )}
         <PasswordInput
           required
-          label="Şifre Tekrar"
-          placeholder="Şifrenizi tekrar girin"
+          label={t("auth.passwordConfirm")}
+          placeholder={t("auth.passwordConfirmPlaceholder")}
           mt="sm"
           {...form.getInputProps("confirmPassword")}
           error={
@@ -177,17 +179,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </Text>
         )}
         <Button type="submit" fullWidth mt="lg" loading={isLoading}>
-          Kayıt Ol
+          {t("nav.register")}
         </Button>
 
         <Text mt="md" size="sm">
-          Zaten hesabınız var mı?{" "}
+          {t("auth.haveAccount")}{" "}
           <Anchor<"button">
             component="button"
             type="button"
             onClick={onLoginClick}
           >
-            Giriş yap
+            {t("nav.login")}
           </Anchor>
         </Text>
       </form>

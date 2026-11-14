@@ -1,4 +1,4 @@
-import { Group } from "@mantine/core";
+import { Box, Group } from "@mantine/core";
 import { CustomInput } from "../../atoms/CustomInput";
 import { ListRowActions } from "./ListRowActions";
 
@@ -20,9 +20,10 @@ export default function RecipeIngredientInput({
   isHeading = false,
 }: RecipeIngredientInputProps) {
   return (
-    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="center" gap="xs">
+    <Group mb="xs" mt={isHeading ? "sm" : undefined} wrap="nowrap" align="center" gap="xs" w="100%">
+      <Box style={{ flex: 1, minWidth: 0 }}>
       <CustomInput
-        style={{ flex: 1, minWidth: 0 }}
+        w="100%"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={isHeading ? "Başlık (ör. Sos için)" : placeholder}
@@ -38,6 +39,7 @@ export default function RecipeIngredientInput({
             : undefined
         }
       />
+      </Box>
       <ListRowActions onInsertHeading={onInsertHeading} onRemove={onRemove} />
     </Group>
   );
