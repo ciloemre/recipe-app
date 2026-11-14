@@ -3,7 +3,7 @@
 
 🚀 **Live Demo:** [https://gastronova.vercel.app/](https://gastronova.vercel.app/)
 
-<img width="1470" alt="Readme" src="https://github.com/user-attachments/assets/963cf38e-16c3-41ef-83ca-3671eb2e3b86">
+<img width="1900" height="977" alt="image" src="https://github.com/user-attachments/assets/528e54bb-2a04-454d-a753-7cff786b5ee4" />
 
 # Table of Contents
 - [Project Overview](#project-overview)
