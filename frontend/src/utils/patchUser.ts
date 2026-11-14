@@ -7,18 +7,26 @@ export interface UserUpdate {
   avatar?: string;
 }
 
-type Person = string | { _id: string; username: string; name?: string; avatar?: string };
+type PersonObject = {
+  _id: string;
+  username: string;
+  name?: string;
+  avatar?: string;
+};
+
+type Person = string | PersonObject;
 
 function patchPerson<T extends Person>(person: T, update: UserUpdate): T {
   if (!person || typeof person === "string" || person._id !== update._id) {
     return person;
   }
+  const current = person as PersonObject;
   return {
-    ...person,
+    ...current,
     name: update.name,
     username: update.username,
     avatar: update.avatar || "",
-  };
+  } as T;
 }
 
 function patchReply(reply: CommentReply, update: UserUpdate): CommentReply {
